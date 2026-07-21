@@ -1,0 +1,6 @@
+# Copy to terraform.tfvars and adjust. Every value here has a workable default, so an empty
+# terraform.tfvars is valid too — this file exists to show what's overridable.
+
+aws_region    = "us-east-1"
+environment   = "dev"
+app_image_tag = "latest"

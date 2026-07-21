@@ -98,14 +98,28 @@
 
 ## AWS and Infrastructure
 
-- [ ] Terraform VPC
-- [ ] Terraform RDS
-- [ ] Terraform S3
-- [ ] Terraform SQS
-- [ ] Terraform SNS
-- [ ] Terraform Secrets Manager
-- [ ] ECS or EKS deployment
-- [ ] IAM least privilege policies
+See terraform/README.md for full detail, design rationale, and known simplifications.
+Validated with `terraform init`/`validate`/`fmt` and a `plan` that got as far as an actual
+AWS API call (proving the whole ~1,850-line module graph resolves and is acyclic) — never
+`apply`'d against real AWS, since this environment has no AWS credentials to apply with.
+
+- [x] Terraform VPC (public/private subnets across 2 AZs, IGW, NAT, route tables)
+- [x] Terraform RDS (one shared Postgres instance, matches the app's existing
+      one-schema-per-service design; RDS-managed master password via Secrets Manager)
+- [x] Terraform S3 (statements/reports/audit-archive; encrypted, public access blocked,
+      versioning + lifecycle on the audit archive)
+- [x] Terraform SQS (two retry queues + shared dead-letter queue with redrive policies)
+- [x] Terraform SNS (customer-notifications/fraud-alerts/operations-alerts topics)
+- [x] Terraform Secrets Manager (JWT signing RSA key pair, provider-credential
+      placeholders — see terraform/README.md's caveat: JwtKeyConfig.java still needs a
+      follow-up change to actually read this instead of self-generating a key every restart)
+- [x] Terraform ElastiCache Redis and MSK Serverless (Kafka) — in the AWS.md target mapping
+      but not originally itemized in this checklist; added since ECS services need both
+- [x] ECS Fargate deployment (Cloud Map service discovery for internal calls, ALB fronting
+      only api-gateway, one task definition per service)
+- [x] IAM least privilege policies (per-service execution + task roles; only
+      reporting-service's task role has a real grant today, matching what application code
+      actually calls — see services.tf's comments)
 
 ## Observability and Resilience
 
