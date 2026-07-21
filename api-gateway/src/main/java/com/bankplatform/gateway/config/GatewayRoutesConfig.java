@@ -50,4 +50,22 @@ public class GatewayRoutesConfig {
                 .before(uri(auditServiceUri))
                 .build();
     }
+
+    @Bean
+    public RouterFunction<ServerResponse> paymentServiceRoute(
+            @Value("${bank-platform.routes.payment-service}") String paymentServiceUri) {
+        return route("payment-service")
+                .route(path("/api/v1/payments/**"), http())
+                .before(uri(paymentServiceUri))
+                .build();
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> reportingServiceRoute(
+            @Value("${bank-platform.routes.reporting-service}") String reportingServiceUri) {
+        return route("reporting-service")
+                .route(path("/api/v1/reports/**"), http())
+                .before(uri(reportingServiceUri))
+                .build();
+    }
 }

@@ -2,85 +2,99 @@
 
 ## Foundation
 
-- [ ] Create Maven parent project
-- [ ] Configure Java 21
-- [ ] Configure Spring Boot 3 dependency management
+- [x] Create Gradle parent project (plan called for Maven; built as a multi-module Gradle project instead)
+- [x] Configure Java 21
+- [x] Configure Spring Boot dependency management (Spring Boot 4.1.0, ahead of the Spring Boot 3 originally planned)
 - [ ] Add Checkstyle or Spotless
-- [ ] Add Docker Compose
-- [ ] Add PostgreSQL container
-- [ ] Add Kafka container
-- [ ] Add Redis container
-- [ ] Add LocalStack container
-- [ ] Add Prometheus, Grafana, and Jaeger
-- [ ] Add GitHub Actions build workflow
+- [x] Add Docker Compose
+- [x] Add PostgreSQL container
+- [x] Add Kafka container
+- [x] Add Redis container (compose service present; no service consumes it yet — see plan/DATABASE.md's Redis Usage list)
+- [x] Add LocalStack container
+- [x] Add Prometheus, Grafana, and Jaeger
+- [x] Add GitHub Actions build workflow
 
 ## Common Library
 
-- [ ] Error response model
-- [ ] Global exception utilities
-- [ ] Event envelope model
-- [ ] Correlation ID filter
-- [ ] Idempotency interfaces
-- [ ] Testcontainers base classes
+- [x] Error response model
+- [x] Global exception utilities
+- [x] Event envelope model
+- [x] Correlation ID filter
+- [x] Idempotency interfaces
+- [x] Testcontainers base classes
 
 ## User Service
 
-- [ ] Register endpoint
-- [ ] Login endpoint
-- [ ] Refresh endpoint
-- [ ] JWT validation
-- [ ] Role model
-- [ ] Flyway migrations
-- [ ] Unit tests
-- [ ] Integration tests
+- [x] Register endpoint
+- [x] Login endpoint
+- [x] Refresh endpoint
+- [x] JWT validation
+- [x] Role model
+- [x] Flyway migrations
+- [x] Unit tests
+- [x] Integration tests
 
 ## Account Service
 
-- [ ] Account aggregate
-- [ ] Money value object
-- [ ] Open account endpoint
-- [ ] Account query endpoints
-- [ ] Balance update application service
-- [ ] Ledger entry table
+- [x] Account aggregate
+- [x] Money value object
+- [x] Open account endpoint
+- [x] Account query endpoints
+- [x] Balance update application service
+- [x] Ledger entry table
 - [ ] Optimistic locking tests
 - [ ] Concurrent transfer tests
 
 ## Transaction Service
 
-- [ ] Deposit command
-- [ ] Withdrawal command
-- [ ] Transfer command
-- [ ] Idempotency key handling
-- [ ] Transaction state machine
-- [ ] Outbox table
-- [ ] Outbox publisher
-- [ ] Kafka producer tests
+- [x] Deposit command
+- [x] Withdrawal command
+- [x] Transfer command
+- [x] Idempotency key handling
+- [x] Transaction state machine
+- [x] Outbox table
+- [x] Outbox publisher
+- [x] Kafka producer tests
 
 ## Kafka Consumers
 
-- [ ] Account Service transfer consumer
-- [ ] Notification Service consumer
-- [ ] Audit Service consumer
-- [ ] Retry configuration
-- [ ] DLQ configuration
-- [ ] Consumer idempotency table
+- [x] Account Service transfer consumer
+- [x] Notification Service consumer
+- [x] Audit Service consumer
+- [x] Retry configuration
+- [x] DLQ configuration
+- [x] Consumer idempotency table
+
+## Payment Service
+
+- [x] Payment instruction aggregate (one-time and recurring schedules)
+- [x] Scheduled payment endpoint
+- [x] Recurring payment endpoint
+- [x] Cancel payment endpoint
+- [x] Payment scheduler job (due-payment polling, publishes payment-due and triggers transfer-started)
+- [x] Payment outcome listener (transfer-completed/transfer-failed -> payment-success/payment-failed)
+- [x] Unit tests
+- [x] Integration tests
 
 ## Fraud Service
 
-- [ ] Kafka Streams topology
-- [ ] Transfer count window rule
-- [ ] Transfer value window rule
-- [ ] Fraud alert producer
-- [ ] Topology tests
+- [x] Kafka Streams topology
+- [x] Transfer count window rule
+- [x] Transfer value window rule
+- [x] Fraud alert producer
+- [x] Topology tests
+- [ ] New-payee-after-password-reset rule (listed as an example rule in plan/SERVICES.md; not yet implemented — no password-reset event exists in the catalog yet)
+- [ ] Repeated-failed-login-then-high-value-transfer rule (same caveat)
+- [ ] Notification/Audit/Account consumers for fraud-alert (per plan/KAFKA.md's topic table; fraud-alert is produced but nothing consumes it yet)
 
 ## Reporting Service
 
-- [ ] Materialized view consumer
-- [ ] Statement job model
-- [ ] CSV generation
-- [ ] PDF generation
-- [ ] S3 adapter
-- [ ] Report status API
+- [x] Materialized view consumer
+- [x] Statement job model
+- [x] CSV generation
+- [x] PDF generation
+- [x] S3 adapter
+- [x] Report status API
 
 ## AWS and Infrastructure
 
@@ -96,7 +110,7 @@
 ## Observability and Resilience
 
 - [ ] JSON logs
-- [ ] Correlation ID propagation
+- [x] Correlation ID propagation (CorrelationIdFilter for HTTP, EventProcessingContext for Kafka consumers)
 - [ ] OpenTelemetry traces
 - [ ] Prometheus metrics
 - [ ] Grafana dashboards

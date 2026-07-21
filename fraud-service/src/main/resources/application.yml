@@ -1,6 +1,20 @@
 spring:
   application:
     name: fraud-service
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
+    streams:
+      application-id: fraud-service
+      properties:
+        default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+        default.value.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+
+bank-platform:
+  fraud:
+    window-minutes: 10
+    rules:
+      max-transfer-count: 5
+      max-transfer-amount: 50000
 
 server:
   port: 8085

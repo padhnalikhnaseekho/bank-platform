@@ -7,6 +7,8 @@ springdocOpenapi = "3.0.3"
 springDependencyManagement = "1.1.7"
 testcontainers = "2.0.5"
 wiremock = "3.13.2"
+awsSdk = "2.42.34"
+pdfbox = "3.0.3"
 
 [libraries]
 spring-boot-starter = { module = "org.springframework.boot:spring-boot-starter" }
@@ -32,8 +34,14 @@ testcontainers-bom = { module = "org.testcontainers:testcontainers-bom", version
 testcontainers-junit-jupiter = { module = "org.testcontainers:testcontainers-junit-jupiter" }
 testcontainers-postgresql = { module = "org.testcontainers:testcontainers-postgresql" }
 testcontainers-kafka = { module = "org.testcontainers:testcontainers-kafka" }
+kafka-streams = { module = "org.apache.kafka:kafka-streams" }
+kafka-streams-test-utils = { module = "org.apache.kafka:kafka-streams-test-utils" }
 wiremock = { module = "org.wiremock:wiremock-standalone", version.ref = "wiremock" }
 spring-boot-starter-kafka = { module = "org.springframework.boot:spring-boot-starter-kafka" }
+aws-sdk-bom = { module = "software.amazon.awssdk:bom", version.ref = "awsSdk" }
+aws-sdk-s3 = { module = "software.amazon.awssdk:s3" }
+pdfbox = { module = "org.apache.pdfbox:pdfbox", version.ref = "pdfbox" }
+testcontainers-localstack = { module = "org.testcontainers:testcontainers-localstack" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "springBoot" }
