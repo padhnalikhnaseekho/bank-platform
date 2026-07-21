@@ -1,23 +1,17 @@
 package com.bankplatform.payment.adapter.in.messaging;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.bankplatform.common.event.EventEnvelope;
-import com.bankplatform.common.event.EventPublisher;
 import com.bankplatform.common.event.IdempotentEventProcessor;
-import com.bankplatform.payment.application.port.PaymentAttemptRepository;
-import com.bankplatform.payment.domain.PaymentAttempt;
-import com.bankplatform.payment.domain.PaymentAttemptStatus;
-import com.bankplatform.payment.domain.PaymentId;
+import com.bankplatform.payment.application.ApplyPaymentOutcomeUseCase;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,10 +24,7 @@ import tools.jackson.databind.ObjectMapper;
 class PaymentOutcomeListenerTest {
 
     @Mock
-    private PaymentAttemptRepository paymentAttemptRepository;
-
-    @Mock
-    private EventPublisher eventPublisher;
+    private ApplyPaymentOutcomeUseCase applyPaymentOutcomeUseCase;
 
     @Mock
     private IdempotentEventProcessor idempotentEventProcessor;
@@ -48,8 +39,10 @@ class PaymentOutcomeListenerTest {
 
     @BeforeEach
     void setUp() {
-        listener = new PaymentOutcomeListener(paymentAttemptRepository, eventPublisher, idempotentEventProcessor,
-                objectMapper);
+        listener = new PaymentOutcomeListener(applyPaymentOutcomeUseCase, idempotentEventProcessor, objectMapper);
+    }
+
+    private void stubProcessorToRunHandler() {
         doAnswer(invocation -> {
             Runnable handler = invocation.getArgument(2);
             handler.run();
@@ -67,41 +60,31 @@ class PaymentOutcomeListenerTest {
     }
 
     @Test
-    void marksTheMatchingAttemptSucceededAndPublishesPaymentSuccess() {
+    void delegatesTransferCompletedAsSuccess() {
+        stubProcessorToRunHandler();
         UUID transactionId = UUID.randomUUID();
-        PaymentAttempt attempt = PaymentAttempt.create(PaymentId.newId(), transactionId);
-        when(paymentAttemptRepository.findByTransactionId(transactionId)).thenReturn(Optional.of(attempt));
 
         listener.onTransferCompleted(toMessage("transfer-completed", transactionId, null));
 
-        assertThat(attempt.status()).isEqualTo(PaymentAttemptStatus.SUCCEEDED);
-        verify(paymentAttemptRepository).save(attempt);
-        verify(eventPublisher).publish(eq("payment-success"), eq("PaymentAttempt"), eq(attempt.id().toString()),
-                any());
+        verify(applyPaymentOutcomeUseCase).execute(eq(transactionId), eq(true), any());
     }
 
     @Test
-    void marksTheMatchingAttemptFailedAndPublishesPaymentFailed() {
+    void delegatesTransferFailedAsFailure() {
+        stubProcessorToRunHandler();
         UUID transactionId = UUID.randomUUID();
-        PaymentAttempt attempt = PaymentAttempt.create(PaymentId.newId(), transactionId);
-        when(paymentAttemptRepository.findByTransactionId(transactionId)).thenReturn(Optional.of(attempt));
 
         listener.onTransferFailed(toMessage("transfer-failed", transactionId, "Insufficient funds"));
 
-        assertThat(attempt.status()).isEqualTo(PaymentAttemptStatus.FAILED);
-        assertThat(attempt.failureReason()).isEqualTo("Insufficient funds");
-        verify(eventPublisher).publish(eq("payment-failed"), eq("PaymentAttempt"), eq(attempt.id().toString()),
-                any());
+        verify(applyPaymentOutcomeUseCase).execute(eq(transactionId), eq(false), eq("Insufficient funds"));
     }
 
     @Test
-    void ignoresTransferOutcomesThatDoNotBelongToAnyPaymentAttempt() {
+    void skipsAlreadyProcessedEvents() {
         UUID transactionId = UUID.randomUUID();
-        when(paymentAttemptRepository.findByTransactionId(transactionId)).thenReturn(Optional.empty());
 
         listener.onTransferCompleted(toMessage("transfer-completed", transactionId, null));
 
-        verify(paymentAttemptRepository, never()).save(any());
-        verify(eventPublisher, never()).publish(any(), any(), any(), any());
+        verify(applyPaymentOutcomeUseCase, never()).execute(any(), anyBoolean(), any());
     }
 }

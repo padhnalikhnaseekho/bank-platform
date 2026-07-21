@@ -2,32 +2,24 @@ package com.bankplatform.transaction.adapter.in.messaging;
 
 import com.bankplatform.common.event.EventEnvelope;
 import com.bankplatform.common.event.EventProcessingContext;
-import com.bankplatform.common.event.EventPublisher;
 import com.bankplatform.common.event.IdempotentEventProcessor;
 import com.bankplatform.transaction.adapter.in.messaging.dto.MoneyMovementOutcomeEvent;
 import com.bankplatform.transaction.adapter.in.messaging.dto.TransferOutcomeEvent;
-import com.bankplatform.transaction.application.event.TransactionStatusChangedPayload;
-import com.bankplatform.transaction.application.port.TransactionRepository;
-import com.bankplatform.transaction.domain.Transaction;
-import com.bankplatform.transaction.domain.TransactionId;
-import java.util.UUID;
+import com.bankplatform.transaction.application.ApplyTransactionOutcomeUseCase;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
 @Component
 public class TransactionOutcomeListener {
 
-    private final TransactionRepository transactionRepository;
-    private final EventPublisher eventPublisher;
+    private final ApplyTransactionOutcomeUseCase applyTransactionOutcomeUseCase;
     private final IdempotentEventProcessor idempotentEventProcessor;
     private final ObjectMapper objectMapper;
 
-    public TransactionOutcomeListener(TransactionRepository transactionRepository, EventPublisher eventPublisher,
+    public TransactionOutcomeListener(ApplyTransactionOutcomeUseCase applyTransactionOutcomeUseCase,
             IdempotentEventProcessor idempotentEventProcessor, ObjectMapper objectMapper) {
-        this.transactionRepository = transactionRepository;
-        this.eventPublisher = eventPublisher;
+        this.applyTransactionOutcomeUseCase = applyTransactionOutcomeUseCase;
         this.idempotentEventProcessor = idempotentEventProcessor;
         this.objectMapper = objectMapper;
     }
@@ -58,7 +50,8 @@ public class TransactionOutcomeListener {
                 envelope.eventType(), () -> {
                     MoneyMovementOutcomeEvent payload = objectMapper.convertValue(envelope.payload(),
                             MoneyMovementOutcomeEvent.class);
-                    applyOutcome(payload.transactionId(), "COMPLETED".equals(payload.status()));
+                    applyTransactionOutcomeUseCase.execute(payload.transactionId(),
+                            "COMPLETED".equals(payload.status()));
                 }));
     }
 
@@ -68,22 +61,7 @@ public class TransactionOutcomeListener {
                 envelope.eventType(), () -> {
                     TransferOutcomeEvent payload = objectMapper.convertValue(envelope.payload(),
                             TransferOutcomeEvent.class);
-                    applyOutcome(payload.transactionId(), success);
+                    applyTransactionOutcomeUseCase.execute(payload.transactionId(), success);
                 }));
-    }
-
-    @Transactional
-    void applyOutcome(String transactionIdValue, boolean success) {
-        TransactionId id = TransactionId.of(UUID.fromString(transactionIdValue));
-        Transaction transaction = transactionRepository.findById(id)
-                .orElseThrow(() -> new IllegalStateException("Unknown transaction: " + transactionIdValue));
-        if (success) {
-            transaction.complete();
-        } else {
-            transaction.fail();
-        }
-        Transaction saved = transactionRepository.save(transaction);
-        eventPublisher.publish("transaction-status-changed", "Transaction", saved.id().toString(),
-                new TransactionStatusChangedPayload(saved.id().toString(), saved.status().name()));
     }
 }
