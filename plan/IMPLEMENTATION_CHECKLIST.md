@@ -42,8 +42,8 @@
 - [x] Account query endpoints
 - [x] Balance update application service
 - [x] Ledger entry table
-- [ ] Optimistic locking tests
-- [ ] Concurrent transfer tests
+- [x] Optimistic locking tests
+- [x] Concurrent transfer tests
 
 ## Transaction Service
 
@@ -85,7 +85,7 @@
 - [x] Topology tests
 - [ ] New-payee-after-password-reset rule (listed as an example rule in plan/SERVICES.md; not yet implemented — no password-reset event exists in the catalog yet)
 - [ ] Repeated-failed-login-then-high-value-transfer rule (same caveat)
-- [ ] Notification/Audit/Account consumers for fraud-alert (per plan/KAFKA.md's topic table; fraud-alert is produced but nothing consumes it yet)
+- [x] Notification/Audit/Account consumers for fraud-alert (Notification emails the customer; Account freezes their active accounts pending review; Audit records it like every other event)
 
 ## Reporting Service
 

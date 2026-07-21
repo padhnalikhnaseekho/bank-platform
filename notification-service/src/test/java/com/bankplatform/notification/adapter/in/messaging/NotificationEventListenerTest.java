@@ -63,6 +63,10 @@ class NotificationEventListenerTest {
     private record NotificationRequestedPayload(String recipientUserId, String channel, String template,
             String message) {}
 
+    private record FraudAlertPayload(UUID id, String customerId, String type, long transferCount,
+            BigDecimal totalAmount, String currency, Instant windowStart, Instant windowEnd, Instant triggeredAt,
+            String message) {}
+
     @Test
     void userCreatedSendsAWelcomeEmail() {
         UUID userId = UUID.randomUUID();
@@ -141,6 +145,20 @@ class NotificationEventListenerTest {
         verify(sendNotificationUseCase).send(eq(sourceCustomerId), eq(Channel.EMAIL), eq("transfer-failure"),
                 anyString());
         verify(sendNotificationUseCase, org.mockito.Mockito.times(1)).send(any(), any(), any(), any());
+    }
+
+    @Test
+    void fraudAlertNotifiesTheAffectedCustomer() {
+        UUID customerId = UUID.randomUUID();
+        String message = toMessage("fraud-alert",
+                new FraudAlertPayload(UUID.randomUUID(), customerId.toString(), "HIGH_TRANSFER_COUNT", 6,
+                        new BigDecimal("100.00"), "INR", Instant.now(), Instant.now(), Instant.now(),
+                        "Customer made 6 transfers"));
+
+        listener.onFraudAlert(message);
+
+        verify(sendNotificationUseCase).send(eq(customerId), eq(Channel.EMAIL), eq("fraud-alert"),
+                eq("Customer made 6 transfers"));
     }
 
     @Test

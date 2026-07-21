@@ -3,6 +3,7 @@ package com.bankplatform.notification.adapter.in.messaging;
 import com.bankplatform.common.event.EventEnvelope;
 import com.bankplatform.common.event.EventProcessingContext;
 import com.bankplatform.common.event.IdempotentEventProcessor;
+import com.bankplatform.notification.adapter.in.messaging.dto.FraudAlertEvent;
 import com.bankplatform.notification.adapter.in.messaging.dto.MoneyMovementOutcomeEvent;
 import com.bankplatform.notification.adapter.in.messaging.dto.NotificationRequestedEvent;
 import com.bankplatform.notification.adapter.in.messaging.dto.TransferOutcomeEvent;
@@ -59,6 +60,15 @@ public class NotificationEventListener {
     @KafkaListener(topics = "transfer-failed")
     public void onTransferFailed(String message) {
         handleTransfer(message, "transfer-failure");
+    }
+
+    @KafkaListener(topics = "fraud-alert")
+    public void onFraudAlert(String message) {
+        withIdempotency(message, envelope -> {
+            FraudAlertEvent event = objectMapper.convertValue(envelope.payload(), FraudAlertEvent.class);
+            sendNotificationUseCase.send(UUID.fromString(event.customerId()), Channel.EMAIL, "fraud-alert",
+                    event.message());
+        });
     }
 
     @KafkaListener(topics = "notification-requested")

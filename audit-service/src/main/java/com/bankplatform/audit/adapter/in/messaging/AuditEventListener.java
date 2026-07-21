@@ -26,7 +26,7 @@ public class AuditEventListener {
     @KafkaListener(topics = { "user-created", "user-login-succeeded", "user-login-failed", "account-created",
             "account-frozen", "money-deposited", "money-withdrawn", "transfer-started", "transfer-completed",
             "transfer-failed", "transaction-created", "transaction-status-changed", "notification-requested",
-            "notification-sent", "notification-failed" })
+            "notification-sent", "notification-failed", "fraud-alert" })
     public void onEvent(String message) {
         EventEnvelope envelope = objectMapper.readValue(message, EventEnvelope.class);
         EventProcessingContext.withCorrelation(envelope, () -> idempotentEventProcessor.process(envelope.eventId(),
