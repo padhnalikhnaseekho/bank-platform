@@ -1,5 +1,8 @@
 com.bankplatform.common.error.GlobalExceptionHandler
 com.bankplatform.common.error.SecurityErrorHandlingAutoConfiguration
 com.bankplatform.common.web.CorrelationIdAutoConfiguration
+com.bankplatform.common.event.OutboxAutoConfiguration
 com.bankplatform.common.event.EventPublisherAutoConfiguration
+com.bankplatform.common.event.IdempotentEventProcessorAutoConfiguration
+com.bankplatform.common.event.KafkaErrorHandlingAutoConfiguration
 com.bankplatform.common.security.JwtAuthenticationAutoConfiguration

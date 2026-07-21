@@ -45,7 +45,7 @@ public class LoginUseCase {
         User user = userRepository.findByEmail(email)
                 .filter(u -> passwordHasher.matches(rawPassword, u.credential().passwordHash()))
                 .orElseThrow(() -> {
-                    eventPublisher.publish("user-login-failed", "User", null, rawEmail);
+                    eventPublisher.publish("user-login-failed", "User", null, new UserLoginFailedPayload(rawEmail));
                     return new UnauthorizedException("Invalid email or password");
                 });
         if (!user.isActive()) {
@@ -58,7 +58,7 @@ public class LoginUseCase {
         refreshTokenRepository.save(
                 RefreshToken.issue(user.id(), OpaqueTokenGenerator.hash(rawRefreshToken), expiresAt));
 
-        eventPublisher.publish("user-login-succeeded", "User", user.id().toString(), user);
+        eventPublisher.publish("user-login-succeeded", "User", user.id().toString(), UserLoginPayload.from(user));
         return new Result(user, accessToken, rawRefreshToken, expiresAt);
     }
 }

@@ -25,7 +25,7 @@ public class OpenAccountUseCase {
     public Account open(UUID customerId, AccountType type, String currencyCode) {
         Account account = Account.open(customerId, generateUniqueAccountNumber(), type, currencyCode);
         Account saved = accountRepository.save(account);
-        eventPublisher.publish("account-created", "Account", saved.id().toString(), saved);
+        eventPublisher.publish("account-created", "Account", saved.id().toString(), AccountEventPayload.from(saved));
         return saved;
     }
 

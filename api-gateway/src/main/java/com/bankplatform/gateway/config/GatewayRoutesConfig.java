@@ -32,4 +32,22 @@ public class GatewayRoutesConfig {
                 .before(uri(accountServiceUri))
                 .build();
     }
+
+    @Bean
+    public RouterFunction<ServerResponse> transactionServiceRoute(
+            @Value("${bank-platform.routes.transaction-service}") String transactionServiceUri) {
+        return route("transaction-service")
+                .route(path("/api/v1/transactions/**"), http())
+                .before(uri(transactionServiceUri))
+                .build();
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> auditServiceRoute(
+            @Value("${bank-platform.routes.audit-service}") String auditServiceUri) {
+        return route("audit-service")
+                .route(path("/api/v1/audit/**"), http())
+                .before(uri(auditServiceUri))
+                .build();
+    }
 }

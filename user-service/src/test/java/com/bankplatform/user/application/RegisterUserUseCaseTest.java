@@ -48,7 +48,8 @@ class RegisterUserUseCaseTest {
 
         assertThat(user.email().value()).isEqualTo("alice@example.com");
         assertThat(user.credential().passwordHash()).isEqualTo("hashed");
-        verify(eventPublisher).publish("user-created", "User", user.id().toString(), user);
+        verify(eventPublisher).publish("user-created", "User", user.id().toString(),
+                UserCreatedPayload.from(user));
     }
 
     @Test

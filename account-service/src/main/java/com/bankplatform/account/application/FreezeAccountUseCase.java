@@ -25,7 +25,7 @@ public class FreezeAccountUseCase {
                 .orElseThrow(() -> new NotFoundException("Account not found"));
         account.freeze();
         Account saved = accountRepository.save(account);
-        eventPublisher.publish("account-frozen", "Account", saved.id().toString(), saved);
+        eventPublisher.publish("account-frozen", "Account", saved.id().toString(), AccountEventPayload.from(saved));
         return saved;
     }
 }

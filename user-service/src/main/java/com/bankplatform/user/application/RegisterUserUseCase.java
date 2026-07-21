@@ -32,7 +32,7 @@ public class RegisterUserUseCase {
         String passwordHash = passwordHasher.hash(rawPassword);
         User user = User.register(email, phone, fullName, passwordHash);
         User saved = userRepository.save(user);
-        eventPublisher.publish("user-created", "User", saved.id().toString(), saved);
+        eventPublisher.publish("user-created", "User", saved.id().toString(), UserCreatedPayload.from(saved));
         return saved;
     }
 }
