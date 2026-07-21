@@ -22,7 +22,8 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/users/register", "/api/v1/auth/**", "/.well-known/jwks.json",
-                                "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/health")
+                                "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/health",
+                                "/actuator/prometheus")
                         .permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(

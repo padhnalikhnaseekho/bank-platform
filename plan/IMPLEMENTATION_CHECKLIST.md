@@ -123,13 +123,29 @@ AWS API call (proving the whole ~1,850-line module graph resolves and is acyclic
 
 ## Observability and Resilience
 
-- [ ] JSON logs
+- [x] JSON logs (Spring Boot 4.1 native structured logging, ECS format, no extra dependency —
+      `logging.structured.format.console: ecs` in all 10 services)
 - [x] Correlation ID propagation (CorrelationIdFilter for HTTP, EventProcessingContext for Kafka consumers)
-- [ ] OpenTelemetry traces
-- [ ] Prometheus metrics
-- [ ] Grafana dashboards
-- [ ] Resilience4j retry
-- [ ] Circuit breaker
-- [ ] Rate limiter
-- [ ] Load tests
+- [x] OpenTelemetry traces (spring-boot-starter-opentelemetry, OTLP export to Jaeger; verified
+      end-to-end including auto-instrumented @Scheduled spans — outbox publisher job showed up
+      as a real trace)
+- [x] Prometheus metrics (micrometer-registry-prometheus + /actuator/prometheus permitAll'd
+      across all 7 secured services; verified live scrape shows target "up" for all 9 app services)
+- [x] Grafana dashboards (one overview dashboard, 7 panels: service up, HTTP request rate,
+      HTTP 5xx rate, HTTP p95 latency, JVM heap, JVM GC pause, Kafka consumer lag; provisioned
+      via docker/grafana/provisioning, verified live)
+- [ ] Resilience4j retry — skipped; the codebase has no custom synchronous inter-service HTTP
+      calls to wrap (only Spring Security's transparent JWKS fetch), so there's no natural
+      application point for it today
+- [ ] Circuit breaker — same reasoning as retry
+- [x] Rate limiter (api-gateway only, the one place it's clearly meaningful regardless of
+      internal call patterns) — in-memory Resilience4j `RateLimiter`, one bucket per client IP
+      per route, 100 req/60s default, 429 on exhaustion; not Bucket4j because Spring Cloud
+      Gateway's built-in Bucket4j filter needs a distributed `AsyncProxyManager` bean we don't
+      have (Redis/Hazelcast), so a plain in-memory limiter is the pragmatic fit here; verified
+      live via k6 (429s under load at the default limit, 0% failures after raising
+      RATE_LIMIT_CAPACITY)
+- [x] Load tests (k6, `load-tests/money-movement.js` — register/login/open account/deposit/read
+      status through the gateway); verified live end-to-end, see `load-tests/README.md` for the
+      rate-limiter caveat when running at higher VU counts
 

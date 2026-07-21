@@ -36,6 +36,11 @@ bank-platform:
       region: ${REPORTS_S3_REGION:us-east-1}
       endpoint-override: ${REPORTS_S3_ENDPOINT:}
 
+logging:
+  structured:
+    format:
+      console: ecs
+
 server:
   port: 8087
 
@@ -43,7 +48,15 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus
   endpoint:
     health:
       show-details: when-authorized
+  tracing:
+    sampling:
+      probability: 1.0
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318/v1/traces}

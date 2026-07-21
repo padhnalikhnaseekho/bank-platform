@@ -16,6 +16,11 @@ bank-platform:
       max-transfer-count: 5
       max-transfer-amount: 50000
 
+logging:
+  structured:
+    format:
+      console: ecs
+
 server:
   port: 8085
 
@@ -23,7 +28,15 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus
   endpoint:
     health:
       show-details: when-authorized
+  tracing:
+    sampling:
+      probability: 1.0
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318/v1/traces}

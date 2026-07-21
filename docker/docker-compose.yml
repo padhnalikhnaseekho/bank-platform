@@ -72,6 +72,11 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    extra_hosts:
+      # Services run on the host via `./gradlew bootRun`, not in this compose file — this
+      # is what lets the container reach them. Docker Desktop usually provides this
+      # automatically, but not plain Docker Engine on Linux, so it's set explicitly.
+      - "host.docker.internal:host-gateway"
 
   grafana:
     image: grafana/grafana:latest
@@ -81,6 +86,7 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: admin
     volumes:
       - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
 
   jaeger:
     image: jaegertracing/all-in-one:latest

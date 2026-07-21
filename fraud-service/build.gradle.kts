@@ -21,6 +21,8 @@ dependencies {
     implementation(project(":common-library"))
     implementation(libs.spring.boot.starter.web)
     implementation(libs.spring.boot.starter.actuator)
+    implementation(libs.micrometer.registry.prometheus)
+    implementation(libs.spring.boot.starter.opentelemetry)
     implementation(libs.spring.boot.starter.kafka)
     implementation(libs.kafka.streams)
     implementation(libs.springdoc.openapi.starter.webmvc.ui)

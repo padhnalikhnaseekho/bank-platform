@@ -22,6 +22,8 @@ dependencies {
     implementation(project(":common-library"))
     implementation(libs.spring.boot.starter.web)
     implementation(libs.spring.boot.starter.actuator)
+    implementation(libs.micrometer.registry.prometheus)
+    implementation(libs.spring.boot.starter.opentelemetry)
     implementation(libs.spring.boot.starter.validation)
     implementation(libs.spring.boot.starter.data.jpa)
     implementation(libs.spring.boot.starter.security)

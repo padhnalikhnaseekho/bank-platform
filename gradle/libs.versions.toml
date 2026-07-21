@@ -9,6 +9,7 @@ testcontainers = "2.0.5"
 wiremock = "3.13.2"
 awsSdk = "2.42.34"
 pdfbox = "3.0.3"
+resilience4j = "2.3.0"
 
 [libraries]
 spring-boot-starter = { module = "org.springframework.boot:spring-boot-starter" }
@@ -42,6 +43,9 @@ aws-sdk-bom = { module = "software.amazon.awssdk:bom", version.ref = "awsSdk" }
 aws-sdk-s3 = { module = "software.amazon.awssdk:s3" }
 pdfbox = { module = "org.apache.pdfbox:pdfbox", version.ref = "pdfbox" }
 testcontainers-localstack = { module = "org.testcontainers:testcontainers-localstack" }
+micrometer-registry-prometheus = { module = "io.micrometer:micrometer-registry-prometheus" }
+spring-boot-starter-opentelemetry = { module = "org.springframework.boot:spring-boot-starter-opentelemetry" }
+resilience4j-ratelimiter = { module = "io.github.resilience4j:resilience4j-ratelimiter" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "springBoot" }

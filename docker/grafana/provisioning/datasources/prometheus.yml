@@ -1,0 +1,12 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    # "prometheus" resolves via Docker Compose's internal network — this is
+    # container-to-container, unlike the host.docker.internal used in prometheus.yml's own
+    # scrape targets (which reach services running on the host, not in this compose file).
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
