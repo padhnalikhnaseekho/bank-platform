@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 15s
+
+# Placeholder config for Phase 0 — just needs Prometheus to start.
+# Per-service scrape targets (Actuator /actuator/prometheus) get added once
+# each service exposes metrics, starting Phase 1.
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
