@@ -1,6 +1,26 @@
 spring:
   application:
     name: account-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/bank_platform}
+    username: ${DB_USERNAME:bank}
+    password: ${DB_PASSWORD:bank}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: account_service
+    open-in-view: false
+  flyway:
+    schemas: account_service
+    default-schema: account_service
+    create-schemas: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${USER_SERVICE_JWKS_URI:http://localhost:8081/.well-known/jwks.json}
 
 server:
   port: 8082

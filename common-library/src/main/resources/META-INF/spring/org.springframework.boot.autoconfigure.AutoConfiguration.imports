@@ -1,0 +1,5 @@
+com.bankplatform.common.error.GlobalExceptionHandler
+com.bankplatform.common.error.SecurityErrorHandlingAutoConfiguration
+com.bankplatform.common.web.CorrelationIdAutoConfiguration
+com.bankplatform.common.event.EventPublisherAutoConfiguration
+com.bankplatform.common.security.JwtAuthenticationAutoConfiguration

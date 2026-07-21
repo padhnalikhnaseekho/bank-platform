@@ -1,9 +1,19 @@
 spring:
   application:
     name: api-gateway
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${USER_SERVICE_JWKS_URI:http://localhost:8081/.well-known/jwks.json}
 
 server:
   port: 8080
+
+bank-platform:
+  routes:
+    user-service: ${USER_SERVICE_URI:http://localhost:8081}
+    account-service: ${ACCOUNT_SERVICE_URI:http://localhost:8082}
 
 management:
   endpoints:

@@ -27,9 +27,36 @@ in `plan/` (service boundaries, Kafka topics, API shapes, roadmap phases) still 
 | `ai-service` | 8089 | Spring AI 2.0 home for LLM-backed capabilities |
 | `common-library` | — | Shared, dependency-only building blocks |
 
-Phase 0 status: each service is a compiling, bootable Spring Boot skeleton with
-`/actuator/health` and OpenAPI (`/v3/api-docs`, `/swagger-ui.html`) wired up. No business
-logic yet — that starts in Phase 1 (`plan/ROADMAP.md`).
+**Status**: Phase 0 (foundation) and Phase 1 (identity and accounts) are done.
+
+- `user-service`: registration, login, refresh tokens, RS256-signed JWTs, JWKS endpoint at
+  `/.well-known/jwks.json`.
+- `account-service`: open/get/list/freeze accounts, optimistic locking, ownership
+  enforcement (a customer can only see their own accounts; freezing is admin-only).
+- `api-gateway`: routes `/api/v1/users/**` and `/api/v1/auth/**` to `user-service`,
+  `/api/v1/accounts/**` to `account-service`; independently validates JWTs at the gateway
+  too (defense in depth, not just trusting the route).
+- Everything else (`transaction-service`, `payment-service`, `fraud-service`,
+  `notification-service`, `reporting-service`, `audit-service`, `ai-service`) is still the
+  Phase 0 skeleton — compiling and bootable, no business logic yet.
+
+Event publishing is stubbed (`common-library`'s `NoOpEventPublisher`) — the roadmap assigns
+the real Kafka/Outbox wiring to Phase 2.
+
+## Local end-to-end flow
+
+```bash
+docker compose -f docker/docker-compose.yml up -d postgres
+./gradlew :user-service:bootRun &
+./gradlew :account-service:bootRun &
+./gradlew :api-gateway:bootRun &
+
+curl -X POST localhost:8080/api/v1/users/register -H 'Content-Type: application/json' \
+  -d '{"email":"alice@example.com","fullName":"Alice","password":"StrongPassword123!"}'
+curl -X POST localhost:8080/api/v1/auth/login -H 'Content-Type: application/json' \
+  -d '{"email":"alice@example.com","password":"StrongPassword123!"}'
+# use the returned accessToken as a Bearer token against /api/v1/accounts via the gateway
+```
 
 ## Prerequisites
 

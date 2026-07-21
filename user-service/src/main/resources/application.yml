@@ -1,6 +1,21 @@
 spring:
   application:
     name: user-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/bank_platform}
+    username: ${DB_USERNAME:bank}
+    password: ${DB_PASSWORD:bank}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: user_service
+    open-in-view: false
+  flyway:
+    schemas: user_service
+    default-schema: user_service
+    create-schemas: true
 
 server:
   port: 8081

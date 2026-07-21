@@ -1,5 +1,6 @@
 package com.bankplatform.account;
 
+import java.util.TimeZone;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -7,6 +8,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class AccountServiceApplication {
 
     public static void main(String[] args) {
+        // Run in UTC regardless of host locale — avoids environment-dependent bugs
+        // (e.g. the JDBC driver rejecting locale-specific zone aliases at connect time).
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         SpringApplication.run(AccountServiceApplication.class, args);
     }
 }
