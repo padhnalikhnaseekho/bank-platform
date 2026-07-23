@@ -5,6 +5,9 @@ spring:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/bank_platform}
     username: ${DB_USERNAME:bank}
     password: ${DB_PASSWORD:bank}
+    hikari:
+      maximum-pool-size: 15
+      connection-timeout: 3000
   jpa:
     hibernate:
       ddl-auto: validate
@@ -28,6 +31,8 @@ spring:
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    listener:
+      concurrency: 3
 
 bank-platform:
   reports:
@@ -43,6 +48,9 @@ logging:
 
 server:
   port: 8087
+  tomcat:
+    threads:
+      max: 100
 
 management:
   endpoints:

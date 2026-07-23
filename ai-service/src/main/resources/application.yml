@@ -9,6 +9,9 @@ logging:
 
 server:
   port: 8089
+  tomcat:
+    threads:
+      max: 100
 
 management:
   endpoints:

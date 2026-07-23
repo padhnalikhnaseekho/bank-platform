@@ -8,6 +8,7 @@ spring:
       properties:
         default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
         default.value.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+        num.stream.threads: 2
 
 bank-platform:
   fraud:
@@ -23,6 +24,9 @@ logging:
 
 server:
   port: 8085
+  tomcat:
+    threads:
+      max: 100
 
 management:
   endpoints:
