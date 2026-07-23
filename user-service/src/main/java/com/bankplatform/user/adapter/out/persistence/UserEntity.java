@@ -19,8 +19,7 @@ import java.util.UUID;
 @Table(name = "users")
 public class UserEntity {
 
-    @Id
-    private UUID id;
+    @Id private UUID id;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -34,11 +33,17 @@ public class UserEntity {
     private String status;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"),
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<RoleEntity> roles = new HashSet<>();
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToOne(
+            mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.EAGER)
     private CredentialEntity credential;
 
     @Column(name = "created_at", nullable = false)
@@ -49,8 +54,15 @@ public class UserEntity {
 
     protected UserEntity() {}
 
-    public UserEntity(UUID id, String email, String phone, String fullName, String status, Set<RoleEntity> roles,
-            Instant createdAt, Instant updatedAt) {
+    public UserEntity(
+            UUID id,
+            String email,
+            String phone,
+            String fullName,
+            String status,
+            Set<RoleEntity> roles,
+            Instant createdAt,
+            Instant updatedAt) {
         this.id = id;
         this.email = email;
         this.phone = phone;

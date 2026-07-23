@@ -23,8 +23,7 @@ import org.springframework.security.access.AccessDeniedException;
 @ExtendWith(MockitoExtension.class)
 class GetTransactionUseCaseTest {
 
-    @Mock
-    private TransactionRepository transactionRepository;
+    @Mock private TransactionRepository transactionRepository;
 
     private GetTransactionUseCase useCase;
 
@@ -36,8 +35,13 @@ class GetTransactionUseCaseTest {
     @Test
     void ownerCanViewTheirOwnTransaction() {
         UUID customerId = UUID.randomUUID();
-        Transaction transaction = Transaction.receive(customerId, TransactionType.DEPOSIT,
-                Money.of(new BigDecimal("10"), "INR"), null, UUID.randomUUID());
+        Transaction transaction =
+                Transaction.receive(
+                        customerId,
+                        TransactionType.DEPOSIT,
+                        Money.of(new BigDecimal("10"), "INR"),
+                        null,
+                        UUID.randomUUID());
         when(transactionRepository.findById(transaction.id())).thenReturn(Optional.of(transaction));
 
         Transaction result = useCase.getById(transaction.id(), customerId, false);
@@ -47,8 +51,13 @@ class GetTransactionUseCaseTest {
 
     @Test
     void adminCanViewAnyTransaction() {
-        Transaction transaction = Transaction.receive(UUID.randomUUID(), TransactionType.DEPOSIT,
-                Money.of(new BigDecimal("10"), "INR"), null, UUID.randomUUID());
+        Transaction transaction =
+                Transaction.receive(
+                        UUID.randomUUID(),
+                        TransactionType.DEPOSIT,
+                        Money.of(new BigDecimal("10"), "INR"),
+                        null,
+                        UUID.randomUUID());
         when(transactionRepository.findById(transaction.id())).thenReturn(Optional.of(transaction));
 
         Transaction result = useCase.getById(transaction.id(), UUID.randomUUID(), true);
@@ -58,8 +67,13 @@ class GetTransactionUseCaseTest {
 
     @Test
     void rejectsViewingSomeoneElsesTransaction() {
-        Transaction transaction = Transaction.receive(UUID.randomUUID(), TransactionType.DEPOSIT,
-                Money.of(new BigDecimal("10"), "INR"), null, UUID.randomUUID());
+        Transaction transaction =
+                Transaction.receive(
+                        UUID.randomUUID(),
+                        TransactionType.DEPOSIT,
+                        Money.of(new BigDecimal("10"), "INR"),
+                        null,
+                        UUID.randomUUID());
         when(transactionRepository.findById(transaction.id())).thenReturn(Optional.of(transaction));
 
         assertThatThrownBy(() -> useCase.getById(transaction.id(), UUID.randomUUID(), false))

@@ -23,28 +23,29 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class GenerateStatementUseCaseTest {
 
-    @Mock
-    private AccountActivityRepository accountActivityRepository;
+    @Mock private AccountActivityRepository accountActivityRepository;
 
-    @Mock
-    private StatementJobRepository statementJobRepository;
+    @Mock private StatementJobRepository statementJobRepository;
 
-    @Mock
-    private ReportStorage reportStorage;
+    @Mock private ReportStorage reportStorage;
 
-    @Mock
-    private CsvStatementRenderer csvStatementRenderer;
+    @Mock private CsvStatementRenderer csvStatementRenderer;
 
-    @Mock
-    private PdfStatementRenderer pdfStatementRenderer;
+    @Mock private PdfStatementRenderer pdfStatementRenderer;
 
     private GenerateStatementUseCase useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new GenerateStatementUseCase(accountActivityRepository, statementJobRepository, reportStorage,
-                csvStatementRenderer, pdfStatementRenderer);
-        when(statementJobRepository.save(any(StatementJob.class))).thenAnswer(inv -> inv.getArgument(0));
+        useCase =
+                new GenerateStatementUseCase(
+                        accountActivityRepository,
+                        statementJobRepository,
+                        reportStorage,
+                        csvStatementRenderer,
+                        pdfStatementRenderer);
+        when(statementJobRepository.save(any(StatementJob.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
     }
 
     @Test
@@ -53,9 +54,11 @@ class GenerateStatementUseCaseTest {
         UUID accountId = UUID.randomUUID();
         Instant from = Instant.now().minusSeconds(3600);
         Instant to = Instant.now();
-        when(accountActivityRepository.findByAccountAndPeriod(accountId, from, to)).thenReturn(List.of());
+        when(accountActivityRepository.findByAccountAndPeriod(accountId, from, to))
+                .thenReturn(List.of());
         when(csvStatementRenderer.render(List.of())).thenReturn("csv".getBytes());
-        when(pdfStatementRenderer.render(any(StatementJob.class), any())).thenReturn("pdf".getBytes());
+        when(pdfStatementRenderer.render(any(StatementJob.class), any()))
+                .thenReturn("pdf".getBytes());
         when(reportStorage.upload(anyString(), any(), anyString())).thenReturn("s3://bucket/key");
 
         StatementJob result = useCase.execute(customerId, accountId, from, to);
@@ -63,8 +66,16 @@ class GenerateStatementUseCaseTest {
         assertThat(result.status()).isEqualTo(StatementStatus.COMPLETED);
         assertThat(result.csvFileUrl()).isEqualTo("s3://bucket/key");
         assertThat(result.pdfFileUrl()).isEqualTo("s3://bucket/key");
-        verify(reportStorage).upload(org.mockito.ArgumentMatchers.contains(".csv"), any(), org.mockito.ArgumentMatchers.eq("text/csv"));
-        verify(reportStorage).upload(org.mockito.ArgumentMatchers.contains(".pdf"), any(), org.mockito.ArgumentMatchers.eq("application/pdf"));
+        verify(reportStorage)
+                .upload(
+                        org.mockito.ArgumentMatchers.contains(".csv"),
+                        any(),
+                        org.mockito.ArgumentMatchers.eq("text/csv"));
+        verify(reportStorage)
+                .upload(
+                        org.mockito.ArgumentMatchers.contains(".pdf"),
+                        any(),
+                        org.mockito.ArgumentMatchers.eq("application/pdf"));
     }
 
     @Test
@@ -72,9 +83,11 @@ class GenerateStatementUseCaseTest {
         UUID accountId = UUID.randomUUID();
         Instant from = Instant.now().minusSeconds(3600);
         Instant to = Instant.now();
-        when(accountActivityRepository.findByAccountAndPeriod(accountId, from, to)).thenReturn(List.of());
+        when(accountActivityRepository.findByAccountAndPeriod(accountId, from, to))
+                .thenReturn(List.of());
         when(csvStatementRenderer.render(List.of())).thenReturn("csv".getBytes());
-        when(pdfStatementRenderer.render(any(StatementJob.class), any())).thenReturn("pdf".getBytes());
+        when(pdfStatementRenderer.render(any(StatementJob.class), any()))
+                .thenReturn("pdf".getBytes());
         when(reportStorage.upload(anyString(), any(), anyString()))
                 .thenThrow(new RuntimeException("S3 unavailable"));
 

@@ -17,8 +17,10 @@ public class MoneyMovementListener {
     private final IdempotentEventProcessor idempotentEventProcessor;
     private final ObjectMapper objectMapper;
 
-    public MoneyMovementListener(ApplyMoneyMovementUseCase applyMoneyMovementUseCase,
-            IdempotentEventProcessor idempotentEventProcessor, ObjectMapper objectMapper) {
+    public MoneyMovementListener(
+            ApplyMoneyMovementUseCase applyMoneyMovementUseCase,
+            IdempotentEventProcessor idempotentEventProcessor,
+            ObjectMapper objectMapper) {
         this.applyMoneyMovementUseCase = applyMoneyMovementUseCase;
         this.idempotentEventProcessor = idempotentEventProcessor;
         this.objectMapper = objectMapper;
@@ -27,13 +29,20 @@ public class MoneyMovementListener {
     @KafkaListener(topics = "transaction-created")
     public void onTransactionCreated(String message) {
         EventEnvelope envelope = objectMapper.readValue(message, EventEnvelope.class);
-        EventProcessingContext.withCorrelation(envelope,
-                () -> idempotentEventProcessor.process(envelope.eventId(), envelope.eventType(), () -> {
-                    TransactionCreatedEvent payload = objectMapper.convertValue(envelope.payload(),
-                            TransactionCreatedEvent.class);
-                    if (!"TRANSFER".equals(payload.type())) {
-                        applyMoneyMovementUseCase.execute(payload);
-                    }
-                }));
+        EventProcessingContext.withCorrelation(
+                envelope,
+                () ->
+                        idempotentEventProcessor.process(
+                                envelope.eventId(),
+                                envelope.eventType(),
+                                () -> {
+                                    TransactionCreatedEvent payload =
+                                            objectMapper.convertValue(
+                                                    envelope.payload(),
+                                                    TransactionCreatedEvent.class);
+                                    if (!"TRANSFER".equals(payload.type())) {
+                                        applyMoneyMovementUseCase.execute(payload);
+                                    }
+                                }));
     }
 }

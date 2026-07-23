@@ -18,9 +18,19 @@ public class StatementJobRepositoryAdapter implements StatementJobRepository {
 
     @Override
     public StatementJob save(StatementJob job) {
-        StatementJobEntity saved = jpaRepository.save(new StatementJobEntity(job.id().value(), job.customerId(),
-                job.accountId(), job.periodStart(), job.periodEnd(), job.status().name(), job.csvFileUrl(),
-                job.pdfFileUrl(), job.createdAt(), job.updatedAt()));
+        StatementJobEntity saved =
+                jpaRepository.save(
+                        new StatementJobEntity(
+                                job.id().value(),
+                                job.customerId(),
+                                job.accountId(),
+                                job.periodStart(),
+                                job.periodEnd(),
+                                job.status().name(),
+                                job.csvFileUrl(),
+                                job.pdfFileUrl(),
+                                job.createdAt(),
+                                job.updatedAt()));
         return toDomain(saved);
     }
 
@@ -30,8 +40,16 @@ public class StatementJobRepositoryAdapter implements StatementJobRepository {
     }
 
     private StatementJob toDomain(StatementJobEntity entity) {
-        return new StatementJob(StatementId.of(entity.getId()), entity.getCustomerId(), entity.getAccountId(),
-                entity.getPeriodStart(), entity.getPeriodEnd(), StatementStatus.valueOf(entity.getStatus()),
-                entity.getCsvFileUrl(), entity.getPdfFileUrl(), entity.getCreatedAt(), entity.getUpdatedAt());
+        return new StatementJob(
+                StatementId.of(entity.getId()),
+                entity.getCustomerId(),
+                entity.getAccountId(),
+                entity.getPeriodStart(),
+                entity.getPeriodEnd(),
+                StatementStatus.valueOf(entity.getStatus()),
+                entity.getCsvFileUrl(),
+                entity.getPdfFileUrl(),
+                entity.getCreatedAt(),
+                entity.getUpdatedAt());
     }
 }

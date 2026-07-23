@@ -13,7 +13,11 @@ public record ApiError(
 
     public record FieldViolation(String field, String message) {}
 
-    public static ApiError of(int status, String errorCode, String message, String correlationId,
+    public static ApiError of(
+            int status,
+            String errorCode,
+            String message,
+            String correlationId,
             List<FieldViolation> details) {
         return new ApiError(Instant.now(), status, errorCode, message, correlationId, details);
     }

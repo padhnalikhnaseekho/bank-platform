@@ -28,14 +28,15 @@ public class RsaJwtTokenIssuer implements TokenIssuer {
     public String issueAccessToken(User user) {
         Instant now = Instant.now();
         List<String> roles = user.roles().stream().map(Role::name).toList();
-        JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuer("user-service")
-                .issuedAt(now)
-                .expiresAt(now.plus(ACCESS_TOKEN_TTL))
-                .subject(user.id().toString())
-                .claim("email", user.email().value())
-                .claim("roles", roles)
-                .build();
+        JwtClaimsSet claims =
+                JwtClaimsSet.builder()
+                        .issuer("user-service")
+                        .issuedAt(now)
+                        .expiresAt(now.plus(ACCESS_TOKEN_TTL))
+                        .subject(user.id().toString())
+                        .claim("email", user.email().value())
+                        .claim("roles", roles)
+                        .build();
         JwsHeader header = JwsHeader.with(SignatureAlgorithm.RS256).build();
         return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
     }

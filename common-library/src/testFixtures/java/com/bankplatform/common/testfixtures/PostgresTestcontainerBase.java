@@ -6,18 +6,19 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * Singleton-container pattern: deliberately NOT annotated with {@code @Testcontainers}/
- * {@code @Container}. That JUnit5 extension manages start/stop per test *class*, so when
- * multiple integration test classes in the same module extend this base and share the one
- * static field, one class's afterAll stops the container out from under the next class —
- * surfacing as a "Connection refused" once a module has two or more such test classes.
- * Starting it once here and never stopping it (Ryuk reaps it at JVM exit) avoids that.
+ * {@code @Container}. That JUnit5 extension manages start/stop per test *class*, so when multiple
+ * integration test classes in the same module extend this base and share the one static field, one
+ * class's afterAll stops the container out from under the next class — surfacing as a "Connection
+ * refused" once a module has two or more such test classes. Starting it once here and never
+ * stopping it (Ryuk reaps it at JVM exit) avoids that.
  */
 public abstract class PostgresTestcontainerBase {
 
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16")
-            .withDatabaseName("bank_platform_test")
-            .withUsername("bank")
-            .withPassword("bank");
+    static final PostgreSQLContainer<?> POSTGRES =
+            new PostgreSQLContainer<>("postgres:16")
+                    .withDatabaseName("bank_platform_test")
+                    .withUsername("bank")
+                    .withPassword("bank");
 
     static {
         POSTGRES.start();

@@ -16,14 +16,30 @@ public class IdempotencyRepositoryAdapter implements IdempotencyRepository {
 
     @Override
     public Optional<IdempotencyRecord> findByKey(String idempotencyKey) {
-        return jpaRepository.findByIdempotencyKey(idempotencyKey).map(e -> new IdempotencyRecord(e.getId(),
-                e.getIdempotencyKey(), e.getRequestHash(), e.getResponseBody(), e.getStatusCode(), e.getCreatedAt(),
-                e.getExpiresAt()));
+        return jpaRepository
+                .findByIdempotencyKey(idempotencyKey)
+                .map(
+                        e ->
+                                new IdempotencyRecord(
+                                        e.getId(),
+                                        e.getIdempotencyKey(),
+                                        e.getRequestHash(),
+                                        e.getResponseBody(),
+                                        e.getStatusCode(),
+                                        e.getCreatedAt(),
+                                        e.getExpiresAt()));
     }
 
     @Override
     public void save(IdempotencyRecord record) {
-        jpaRepository.save(new IdempotencyRecordEntity(record.id(), record.idempotencyKey(), record.requestHash(),
-                record.responseBody(), record.statusCode(), record.createdAt(), record.expiresAt()));
+        jpaRepository.save(
+                new IdempotencyRecordEntity(
+                        record.id(),
+                        record.idempotencyKey(),
+                        record.requestHash(),
+                        record.responseBody(),
+                        record.statusCode(),
+                        record.createdAt(),
+                        record.expiresAt()));
     }
 }

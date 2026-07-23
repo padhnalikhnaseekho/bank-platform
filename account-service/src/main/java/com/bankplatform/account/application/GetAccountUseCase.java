@@ -20,8 +20,10 @@ public class GetAccountUseCase {
 
     @Transactional(readOnly = true)
     public Account getById(AccountId id, UUID requesterId, boolean isAdmin) {
-        Account account = accountRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Account not found"));
+        Account account =
+                accountRepository
+                        .findById(id)
+                        .orElseThrow(() -> new NotFoundException("Account not found"));
         if (!isAdmin && !account.customerId().equals(requesterId)) {
             throw new AccessDeniedException("Not authorized to view this account");
         }

@@ -9,7 +9,8 @@ public class Credential {
     private final Instant passwordChangedAt;
     private final int failedAttempts;
 
-    public Credential(UserId userId, String passwordHash, Instant passwordChangedAt, int failedAttempts) {
+    public Credential(
+            UserId userId, String passwordHash, Instant passwordChangedAt, int failedAttempts) {
         this.userId = userId;
         this.passwordHash = passwordHash;
         this.passwordChangedAt = passwordChangedAt;

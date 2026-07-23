@@ -28,11 +28,9 @@ import tools.jackson.databind.ObjectMapper;
 @ExtendWith(MockitoExtension.class)
 class ApplyMoneyMovementUseCaseTest {
 
-    @Mock
-    private AccountRepository accountRepository;
+    @Mock private AccountRepository accountRepository;
 
-    @Mock
-    private EventPublisher eventPublisher;
+    @Mock private EventPublisher eventPublisher;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -45,17 +43,25 @@ class ApplyMoneyMovementUseCaseTest {
 
     @Test
     void creditsTheTargetAccountOnDeposit() {
-        Account account = Account.open(UUID.randomUUID(), "123456789012", AccountType.SAVINGS, "INR");
+        Account account =
+                Account.open(UUID.randomUUID(), "123456789012", AccountType.SAVINGS, "INR");
         String transactionId = UUID.randomUUID().toString();
         when(accountRepository.findById(account.id())).thenReturn(Optional.of(account));
 
-        useCase.execute(new TransactionCreatedEvent(transactionId, "DEPOSIT", null, account.id().toString(),
-                new BigDecimal("50.00"), "INR"));
+        useCase.execute(
+                new TransactionCreatedEvent(
+                        transactionId,
+                        "DEPOSIT",
+                        null,
+                        account.id().toString(),
+                        new BigDecimal("50.00"),
+                        "INR"));
 
         assertThat(account.balance().amount()).isEqualByComparingTo("50.00");
         verify(accountRepository).save(account);
         verify(accountRepository).saveLedgerEntry(any(LedgerEntry.class));
-        verify(eventPublisher).publish(eq("money-deposited"), eq("Account"), eq(account.id().toString()), any());
+        verify(eventPublisher)
+                .publish(eq("money-deposited"), eq("Account"), eq(account.id().toString()), any());
     }
 
     @Test
@@ -63,27 +69,50 @@ class ApplyMoneyMovementUseCaseTest {
         UUID accountId = UUID.randomUUID();
         when(accountRepository.findById(AccountId.of(accountId))).thenReturn(Optional.empty());
 
-        useCase.execute(new TransactionCreatedEvent(UUID.randomUUID().toString(), "WITHDRAWAL",
-                accountId.toString(), null, new BigDecimal("10.00"), "INR"));
+        useCase.execute(
+                new TransactionCreatedEvent(
+                        UUID.randomUUID().toString(),
+                        "WITHDRAWAL",
+                        accountId.toString(),
+                        null,
+                        new BigDecimal("10.00"),
+                        "INR"));
 
         ArgumentCaptor<Object> payloadCaptor = ArgumentCaptor.forClass(Object.class);
-        verify(eventPublisher).publish(eq("money-withdrawn"), eq("Account"), eq(accountId.toString()),
-                payloadCaptor.capture());
-        assertThat(objectMapper.writeValueAsString(payloadCaptor.getValue())).contains("\"status\":\"FAILED\"");
+        verify(eventPublisher)
+                .publish(
+                        eq("money-withdrawn"),
+                        eq("Account"),
+                        eq(accountId.toString()),
+                        payloadCaptor.capture());
+        assertThat(objectMapper.writeValueAsString(payloadCaptor.getValue()))
+                .contains("\"status\":\"FAILED\"");
     }
 
     @Test
     void publishesAFailedOutcomeWhenWithdrawalExceedsBalance() {
-        Account account = Account.open(UUID.randomUUID(), "123456789012", AccountType.CURRENT, "INR");
+        Account account =
+                Account.open(UUID.randomUUID(), "123456789012", AccountType.CURRENT, "INR");
         when(accountRepository.findById(account.id())).thenReturn(Optional.of(account));
 
-        useCase.execute(new TransactionCreatedEvent(UUID.randomUUID().toString(), "WITHDRAWAL",
-                account.id().toString(), null, new BigDecimal("500.00"), "INR"));
+        useCase.execute(
+                new TransactionCreatedEvent(
+                        UUID.randomUUID().toString(),
+                        "WITHDRAWAL",
+                        account.id().toString(),
+                        null,
+                        new BigDecimal("500.00"),
+                        "INR"));
 
         verify(accountRepository, never()).save(any());
         ArgumentCaptor<Object> payloadCaptor = ArgumentCaptor.forClass(Object.class);
-        verify(eventPublisher).publish(eq("money-withdrawn"), eq("Account"), eq(account.id().toString()),
-                payloadCaptor.capture());
-        assertThat(objectMapper.writeValueAsString(payloadCaptor.getValue())).contains("\"status\":\"FAILED\"");
+        verify(eventPublisher)
+                .publish(
+                        eq("money-withdrawn"),
+                        eq("Account"),
+                        eq(account.id().toString()),
+                        payloadCaptor.capture());
+        assertThat(objectMapper.writeValueAsString(payloadCaptor.getValue()))
+                .contains("\"status\":\"FAILED\"");
     }
 }

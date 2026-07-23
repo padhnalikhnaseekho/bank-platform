@@ -17,8 +17,16 @@ public record StatementJobResponse(
         Instant updatedAt) {
 
     public static StatementJobResponse from(StatementJob job) {
-        return new StatementJobResponse(job.id().value(), job.customerId(), job.accountId(), job.periodStart(),
-                job.periodEnd(), job.status().name(), job.csvFileUrl(), job.pdfFileUrl(), job.createdAt(),
+        return new StatementJobResponse(
+                job.id().value(),
+                job.customerId(),
+                job.accountId(),
+                job.periodStart(),
+                job.periodEnd(),
+                job.status().name(),
+                job.csvFileUrl(),
+                job.pdfFileUrl(),
+                job.createdAt(),
                 job.updatedAt());
     }
 }

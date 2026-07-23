@@ -18,8 +18,8 @@ public class SearchAuditEventsUseCase {
     }
 
     @Transactional(readOnly = true)
-    public Page<AuditEvent> search(String aggregateId, String eventType, Instant from, Instant to,
-            Pageable pageable) {
+    public Page<AuditEvent> search(
+            String aggregateId, String eventType, Instant from, Instant to, Pageable pageable) {
         return auditEventRepository.search(aggregateId, eventType, from, to, pageable);
     }
 }

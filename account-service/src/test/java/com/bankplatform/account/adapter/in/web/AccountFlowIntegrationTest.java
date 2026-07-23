@@ -10,8 +10,8 @@ import com.jayway.jsonpath.JsonPath;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,68 +20,104 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 class AccountFlowIntegrationTest extends PostgresTestcontainerBase {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
     @Test
     void openGetAndFreezeFlow() throws Exception {
         UUID customerId = UUID.randomUUID();
-        String openBody = """
+        String openBody =
+                """
                 {"type":"SAVINGS","currency":"INR"}
                 """;
 
-        String openResponse = mockMvc.perform(post("/api/v1/accounts").contentType(MediaType.APPLICATION_JSON)
-                        .content(openBody)
-                        .with(jwt().jwt(j -> j.subject(customerId.toString()))
-                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER"))))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
+        String openResponse =
+                mockMvc.perform(
+                                post("/api/v1/accounts")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(openBody)
+                                        .with(
+                                                jwt().jwt(j -> j.subject(customerId.toString()))
+                                                        .authorities(
+                                                                new SimpleGrantedAuthority(
+                                                                        "ROLE_CUSTOMER"))))
+                        .andExpect(status().isCreated())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
 
         String accountId = JsonPath.read(openResponse, "$.id");
 
-        mockMvc.perform(get("/api/v1/accounts/" + accountId)
-                        .with(jwt().jwt(j -> j.subject(customerId.toString()))
-                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER"))))
+        mockMvc.perform(
+                        get("/api/v1/accounts/" + accountId)
+                                .with(
+                                        jwt().jwt(j -> j.subject(customerId.toString()))
+                                                .authorities(
+                                                        new SimpleGrantedAuthority(
+                                                                "ROLE_CUSTOMER"))))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(post("/api/v1/accounts/" + accountId + "/freeze")
-                        .with(jwt().jwt(j -> j.subject(customerId.toString()))
-                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER"))))
+        mockMvc.perform(
+                        post("/api/v1/accounts/" + accountId + "/freeze")
+                                .with(
+                                        jwt().jwt(j -> j.subject(customerId.toString()))
+                                                .authorities(
+                                                        new SimpleGrantedAuthority(
+                                                                "ROLE_CUSTOMER"))))
                 .andExpect(status().isForbidden());
 
-        mockMvc.perform(post("/api/v1/accounts/" + accountId + "/freeze")
-                        .with(jwt().jwt(j -> j.subject(UUID.randomUUID().toString()))
-                                .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+        mockMvc.perform(
+                        post("/api/v1/accounts/" + accountId + "/freeze")
+                                .with(
+                                        jwt().jwt(j -> j.subject(UUID.randomUUID().toString()))
+                                                .authorities(
+                                                        new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isOk());
     }
 
     @Test
     void anotherCustomerCannotViewSomeoneElsesAccount() throws Exception {
         UUID ownerId = UUID.randomUUID();
-        String openBody = """
+        String openBody =
+                """
                 {"type":"CURRENT","currency":"INR"}
                 """;
 
-        String openResponse = mockMvc.perform(post("/api/v1/accounts").contentType(MediaType.APPLICATION_JSON)
-                        .content(openBody)
-                        .with(jwt().jwt(j -> j.subject(ownerId.toString()))
-                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER"))))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
+        String openResponse =
+                mockMvc.perform(
+                                post("/api/v1/accounts")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(openBody)
+                                        .with(
+                                                jwt().jwt(j -> j.subject(ownerId.toString()))
+                                                        .authorities(
+                                                                new SimpleGrantedAuthority(
+                                                                        "ROLE_CUSTOMER"))))
+                        .andExpect(status().isCreated())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
         String accountId = JsonPath.read(openResponse, "$.id");
 
-        mockMvc.perform(get("/api/v1/accounts/" + accountId)
-                        .with(jwt().jwt(j -> j.subject(UUID.randomUUID().toString()))
-                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER"))))
+        mockMvc.perform(
+                        get("/api/v1/accounts/" + accountId)
+                                .with(
+                                        jwt().jwt(j -> j.subject(UUID.randomUUID().toString()))
+                                                .authorities(
+                                                        new SimpleGrantedAuthority(
+                                                                "ROLE_CUSTOMER"))))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void openAccountWithoutTokenIsUnauthorized() throws Exception {
-        String openBody = """
+        String openBody =
+                """
                 {"type":"SAVINGS","currency":"INR"}
                 """;
-        mockMvc.perform(post("/api/v1/accounts").contentType(MediaType.APPLICATION_JSON).content(openBody))
+        mockMvc.perform(
+                        post("/api/v1/accounts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(openBody))
                 .andExpect(status().isUnauthorized());
     }
 }

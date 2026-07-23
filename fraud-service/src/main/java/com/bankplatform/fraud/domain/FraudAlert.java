@@ -16,9 +16,23 @@ public record FraudAlert(
         Instant triggeredAt,
         String message) {
 
-    public static FraudAlert of(String customerId, FraudAlertType type, TransferWindowStats stats,
-            Instant windowStart, Instant windowEnd, String message) {
-        return new FraudAlert(UUID.randomUUID(), customerId, type, stats.count(), stats.totalAmount(),
-                stats.currency(), windowStart, windowEnd, Instant.now(), message);
+    public static FraudAlert of(
+            String customerId,
+            FraudAlertType type,
+            TransferWindowStats stats,
+            Instant windowStart,
+            Instant windowEnd,
+            String message) {
+        return new FraudAlert(
+                UUID.randomUUID(),
+                customerId,
+                type,
+                stats.count(),
+                stats.totalAmount(),
+                stats.currency(),
+                windowStart,
+                windowEnd,
+                Instant.now(),
+                message);
     }
 }

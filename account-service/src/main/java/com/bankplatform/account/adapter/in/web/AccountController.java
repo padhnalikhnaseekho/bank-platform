@@ -15,7 +15,6 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,8 +37,11 @@ public class AccountController {
     private final ListAccountsUseCase listAccountsUseCase;
     private final FreezeAccountUseCase freezeAccountUseCase;
 
-    public AccountController(OpenAccountUseCase openAccountUseCase, GetAccountUseCase getAccountUseCase,
-            ListAccountsUseCase listAccountsUseCase, FreezeAccountUseCase freezeAccountUseCase) {
+    public AccountController(
+            OpenAccountUseCase openAccountUseCase,
+            GetAccountUseCase getAccountUseCase,
+            ListAccountsUseCase listAccountsUseCase,
+            FreezeAccountUseCase freezeAccountUseCase) {
         this.openAccountUseCase = openAccountUseCase;
         this.getAccountUseCase = getAccountUseCase;
         this.listAccountsUseCase = listAccountsUseCase;
@@ -47,24 +49,28 @@ public class AccountController {
     }
 
     @PostMapping
-    public ResponseEntity<AccountResponse> open(@Valid @RequestBody OpenAccountRequest request,
-            @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<AccountResponse> open(
+            @Valid @RequestBody OpenAccountRequest request, @AuthenticationPrincipal Jwt jwt) {
         UUID customerId = UUID.fromString(jwt.getSubject());
-        Account account = openAccountUseCase.open(customerId, AccountType.valueOf(request.type()),
-                request.currency());
+        Account account =
+                openAccountUseCase.open(
+                        customerId, AccountType.valueOf(request.type()), request.currency());
         return ResponseEntity.status(HttpStatus.CREATED).body(AccountResponse.from(account));
     }
 
     @GetMapping("/{accountId}")
     public AccountResponse get(@PathVariable UUID accountId, @AuthenticationPrincipal Jwt jwt) {
-        Account account = getAccountUseCase.getById(AccountId.of(accountId), UUID.fromString(jwt.getSubject()),
-                isAdmin(jwt));
+        Account account =
+                getAccountUseCase.getById(
+                        AccountId.of(accountId), UUID.fromString(jwt.getSubject()), isAdmin(jwt));
         return AccountResponse.from(account);
     }
 
     @GetMapping
-    public AccountListResponse list(@AuthenticationPrincipal Jwt jwt,
-            @RequestParam(required = false) AccountStatus status, @RequestParam(defaultValue = "0") int page,
+    public AccountListResponse list(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestParam(required = false) AccountStatus status,
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         UUID customerId = UUID.fromString(jwt.getSubject());
         return AccountListResponse.from(

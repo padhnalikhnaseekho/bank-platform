@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AccountActivityJpaRepository extends JpaRepository<AccountActivityEntity, UUID> {
 
-    List<AccountActivityEntity> findByAccountIdAndOccurredAtBetweenOrderByOccurredAtAsc(UUID accountId, Instant from,
-            Instant to);
+    List<AccountActivityEntity> findByAccountIdAndOccurredAtBetweenOrderByOccurredAtAsc(
+            UUID accountId, Instant from, Instant to);
 }

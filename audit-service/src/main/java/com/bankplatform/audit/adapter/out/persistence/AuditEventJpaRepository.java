@@ -10,11 +10,16 @@ import org.springframework.data.repository.query.Param;
 
 public interface AuditEventJpaRepository extends JpaRepository<AuditEventEntity, UUID> {
 
-    @Query("SELECT a FROM AuditEventEntity a WHERE "
-            + "(:aggregateId IS NULL OR a.aggregateId = :aggregateId) AND "
-            + "(:eventType IS NULL OR a.eventType = :eventType) AND "
-            + "(CAST(:from AS java.time.Instant) IS NULL OR a.occurredAt >= :from) AND "
-            + "(CAST(:to AS java.time.Instant) IS NULL OR a.occurredAt <= :to)")
-    Page<AuditEventEntity> search(@Param("aggregateId") String aggregateId, @Param("eventType") String eventType,
-            @Param("from") Instant from, @Param("to") Instant to, Pageable pageable);
+    @Query(
+            "SELECT a FROM AuditEventEntity a WHERE "
+                    + "(:aggregateId IS NULL OR a.aggregateId = :aggregateId) AND "
+                    + "(:eventType IS NULL OR a.eventType = :eventType) AND "
+                    + "(CAST(:from AS java.time.Instant) IS NULL OR a.occurredAt >= :from) AND "
+                    + "(CAST(:to AS java.time.Instant) IS NULL OR a.occurredAt <= :to)")
+    Page<AuditEventEntity> search(
+            @Param("aggregateId") String aggregateId,
+            @Param("eventType") String eventType,
+            @Param("from") Instant from,
+            @Param("to") Instant to,
+            Pageable pageable);
 }

@@ -9,8 +9,7 @@ import tools.jackson.databind.ObjectMapper;
 
 /**
  * Verifies notification-service can still read the shared transfer-completed/transfer-failed
- * contract fixtures published by account-service (see TransferOutcomePayloadContractTest
- * there).
+ * contract fixtures published by account-service (see TransferOutcomePayloadContractTest there).
  */
 class TransferOutcomeEventContractTest {
 
@@ -18,8 +17,9 @@ class TransferOutcomeEventContractTest {
 
     @Test
     void deserializesTransferCompletedContract() {
-        TransferOutcomeEvent event = objectMapper.readValue(ContractFixtures.read("transfer-completed"),
-                TransferOutcomeEvent.class);
+        TransferOutcomeEvent event =
+                objectMapper.readValue(
+                        ContractFixtures.read("transfer-completed"), TransferOutcomeEvent.class);
 
         assertThat(event.transactionId()).isEqualTo("8f14e45f-ceea-467e-adde-3fb5c8e75f92");
         assertThat(event.sourceCustomerId()).isEqualTo("d1a2b3c4-d5e6-4f70-8a91-0b1c2d3e4f50");
@@ -30,8 +30,9 @@ class TransferOutcomeEventContractTest {
 
     @Test
     void deserializesTransferFailedContract() {
-        TransferOutcomeEvent event = objectMapper.readValue(ContractFixtures.read("transfer-failed"),
-                TransferOutcomeEvent.class);
+        TransferOutcomeEvent event =
+                objectMapper.readValue(
+                        ContractFixtures.read("transfer-failed"), TransferOutcomeEvent.class);
 
         assertThat(event.transactionId()).isEqualTo("8f14e45f-ceea-467e-adde-3fb5c8e75f92");
         assertThat(event.failureReason()).isEqualTo("INSUFFICIENT_FUNDS");

@@ -28,25 +28,28 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import tools.jackson.databind.ObjectMapper;
 
 /**
- * Fans many concurrent transfers into a single shared target account — the scenario the
- * "Concurrent transfer tests" checklist item calls for. Each transfer retries on an
- * optimistic-locking conflict (mirroring what Kafka's own redelivery-with-backoff would
- * eventually do in production; see KafkaErrorHandlingAutoConfiguration) so the assertion is
- * on the end state: no concurrent credit is ever silently lost.
+ * Fans many concurrent transfers into a single shared target account — the scenario the "Concurrent
+ * transfer tests" checklist item calls for. Each transfer retries on an optimistic-locking conflict
+ * (mirroring what Kafka's own redelivery-with-backoff would eventually do in production; see
+ * KafkaErrorHandlingAutoConfiguration) so the assertion is on the end state: no concurrent credit
+ * is ever silently lost.
  */
 @SpringBootTest
 class ConcurrentTransferIntegrationTest extends PostgresTestcontainerBase {
 
-    @Autowired
-    private AccountRepository accountRepository;
+    @Autowired private AccountRepository accountRepository;
 
-    @Autowired
-    private TransferListener transferListener;
+    @Autowired private TransferListener transferListener;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private record TransferPayload(String transactionId, String type, String sourceAccountId, String targetAccountId,
-            BigDecimal amount, String currency) {}
+    private record TransferPayload(
+            String transactionId,
+            String type,
+            String sourceAccountId,
+            String targetAccountId,
+            BigDecimal amount,
+            String currency) {}
 
     @Test
     void manyConcurrentTransfersIntoTheSameAccountAreAllApplied() throws Exception {
@@ -54,15 +57,25 @@ class ConcurrentTransferIntegrationTest extends PostgresTestcontainerBase {
         int concurrency = 10;
         BigDecimal perTransferAmount = new BigDecimal("10.00");
 
-        Account target = accountRepository
-                .save(Account.open(UUID.randomUUID(), "900000000002", AccountType.SAVINGS, "INR"));
-        List<AccountId> sourceIds = IntStream.range(0, concurrency)
-                .mapToObj(i -> {
-                    Account source = Account.open(UUID.randomUUID(), "90000000010" + i, AccountType.CURRENT, "INR");
-                    source.credit(Money.of(new BigDecimal("100.00"), "INR"), "seed");
-                    return accountRepository.save(source).id();
-                })
-                .toList();
+        Account target =
+                accountRepository.save(
+                        Account.open(
+                                UUID.randomUUID(), "900000000002", AccountType.SAVINGS, "INR"));
+        List<AccountId> sourceIds =
+                IntStream.range(0, concurrency)
+                        .mapToObj(
+                                i -> {
+                                    Account source =
+                                            Account.open(
+                                                    UUID.randomUUID(),
+                                                    "90000000010" + i,
+                                                    AccountType.CURRENT,
+                                                    "INR");
+                                    source.credit(
+                                            Money.of(new BigDecimal("100.00"), "INR"), "seed");
+                                    return accountRepository.save(source).id();
+                                })
+                        .toList();
 
         CountDownLatch ready = new CountDownLatch(concurrency);
         CountDownLatch start = new CountDownLatch(1);
@@ -73,14 +86,20 @@ class ConcurrentTransferIntegrationTest extends PostgresTestcontainerBase {
         try (ExecutorService virtualThreadsPerTask = Executors.newVirtualThreadPerTaskExecutor()) {
             List<Future<?>> futures = new ArrayList<>();
             for (AccountId sourceId : sourceIds) {
-                futures.add(virtualThreadsPerTask.submit(() -> {
-                    ready.countDown();
-                    awaitUninterruptibly(start);
-                    String message = transferMessage(sourceId.value(), target.id().value(), perTransferAmount);
-                    if (!transferWithRetry(message)) {
-                        failuresNeverRecovered.incrementAndGet();
-                    }
-                }));
+                futures.add(
+                        virtualThreadsPerTask.submit(
+                                () -> {
+                                    ready.countDown();
+                                    awaitUninterruptibly(start);
+                                    String message =
+                                            transferMessage(
+                                                    sourceId.value(),
+                                                    target.id().value(),
+                                                    perTransferAmount);
+                                    if (!transferWithRetry(message)) {
+                                        failuresNeverRecovered.incrementAndGet();
+                                    }
+                                }));
             }
 
             ready.await(5, TimeUnit.SECONDS);
@@ -114,10 +133,27 @@ class ConcurrentTransferIntegrationTest extends PostgresTestcontainerBase {
 
     private String transferMessage(UUID sourceAccountId, UUID targetAccountId, BigDecimal amount) {
         String transactionId = UUID.randomUUID().toString();
-        TransferPayload payload = new TransferPayload(transactionId, "TRANSFER", sourceAccountId.toString(),
-                targetAccountId.toString(), amount, "INR");
-        EventEnvelope envelope = new EventEnvelope(UUID.randomUUID(), "transfer-started", 1, Instant.now(),
-                "transaction-service", "corr-1", null, "Transaction", transactionId, transactionId, payload);
+        TransferPayload payload =
+                new TransferPayload(
+                        transactionId,
+                        "TRANSFER",
+                        sourceAccountId.toString(),
+                        targetAccountId.toString(),
+                        amount,
+                        "INR");
+        EventEnvelope envelope =
+                new EventEnvelope(
+                        UUID.randomUUID(),
+                        "transfer-started",
+                        1,
+                        Instant.now(),
+                        "transaction-service",
+                        "corr-1",
+                        null,
+                        "Transaction",
+                        transactionId,
+                        transactionId,
+                        payload);
         return objectMapper.writeValueAsString(envelope);
     }
 

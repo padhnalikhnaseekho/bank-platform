@@ -25,15 +25,17 @@ public class UserController {
     private final RegisterUserUseCase registerUserUseCase;
     private final GetCurrentUserUseCase getCurrentUserUseCase;
 
-    public UserController(RegisterUserUseCase registerUserUseCase, GetCurrentUserUseCase getCurrentUserUseCase) {
+    public UserController(
+            RegisterUserUseCase registerUserUseCase, GetCurrentUserUseCase getCurrentUserUseCase) {
         this.registerUserUseCase = registerUserUseCase;
         this.getCurrentUserUseCase = getCurrentUserUseCase;
     }
 
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
-        User user = registerUserUseCase.register(request.email(), request.phone(), request.fullName(),
-                request.password());
+        User user =
+                registerUserUseCase.register(
+                        request.email(), request.phone(), request.fullName(), request.password());
         return ResponseEntity.status(HttpStatus.CREATED).body(UserResponse.from(user));
     }
 

@@ -20,7 +20,6 @@ import org.apache.kafka.streams.TestOutputTopic;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.TopologyTestDriver;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
 
@@ -32,14 +31,23 @@ class FraudDetectionTopologyBuilderTest {
     private TestInputTopic<String, String> input;
     private TestOutputTopic<String, String> output;
 
-    private record TransferOutcomePayload(String transactionId, String sourceAccountId, String targetAccountId,
-            String sourceCustomerId, String targetCustomerId, BigDecimal amount, String currency,
+    private record TransferOutcomePayload(
+            String transactionId,
+            String sourceAccountId,
+            String targetAccountId,
+            String sourceCustomerId,
+            String targetCustomerId,
+            BigDecimal amount,
+            String currency,
             String failureReason) {}
 
     private void startDriver(long maxTransferCount, String maxTransferAmount) {
         StreamsBuilder streamsBuilder = new StreamsBuilder();
-        FraudDetectionTopologyBuilder.build(streamsBuilder, objectMapper,
-                List.of(new HighTransferCountRule(maxTransferCount),
+        FraudDetectionTopologyBuilder.build(
+                streamsBuilder,
+                objectMapper,
+                List.of(
+                        new HighTransferCountRule(maxTransferCount),
                         new HighTransferValueRule(new BigDecimal(maxTransferAmount))),
                 Duration.ofMinutes(10));
         Topology topology = streamsBuilder.build();
@@ -49,10 +57,16 @@ class FraudDetectionTopologyBuilderTest {
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "dummy:1234");
 
         driver = new TopologyTestDriver(topology, props);
-        input = driver.createInputTopic(FraudDetectionTopologyBuilder.INPUT_TOPIC, new StringSerializer(),
-                new StringSerializer());
-        output = driver.createOutputTopic(FraudDetectionTopologyBuilder.OUTPUT_TOPIC, new StringDeserializer(),
-                new StringDeserializer());
+        input =
+                driver.createInputTopic(
+                        FraudDetectionTopologyBuilder.INPUT_TOPIC,
+                        new StringSerializer(),
+                        new StringSerializer());
+        output =
+                driver.createOutputTopic(
+                        FraudDetectionTopologyBuilder.OUTPUT_TOPIC,
+                        new StringDeserializer(),
+                        new StringDeserializer());
     }
 
     @AfterEach
@@ -63,12 +77,29 @@ class FraudDetectionTopologyBuilderTest {
     }
 
     private String transferCompletedMessage(String sourceCustomerId, BigDecimal amount) {
-        TransferOutcomePayload payload = new TransferOutcomePayload(UUID.randomUUID().toString(),
-                UUID.randomUUID().toString(), UUID.randomUUID().toString(), sourceCustomerId,
-                UUID.randomUUID().toString(), amount, "INR", null);
-        EventEnvelope envelope = new EventEnvelope(UUID.randomUUID(), "transfer-completed", 1, Instant.now(),
-                "account-service", "corr-1", null, "Transfer", payload.transactionId(), payload.transactionId(),
-                payload);
+        TransferOutcomePayload payload =
+                new TransferOutcomePayload(
+                        UUID.randomUUID().toString(),
+                        UUID.randomUUID().toString(),
+                        UUID.randomUUID().toString(),
+                        sourceCustomerId,
+                        UUID.randomUUID().toString(),
+                        amount,
+                        "INR",
+                        null);
+        EventEnvelope envelope =
+                new EventEnvelope(
+                        UUID.randomUUID(),
+                        "transfer-completed",
+                        1,
+                        Instant.now(),
+                        "account-service",
+                        "corr-1",
+                        null,
+                        "Transfer",
+                        payload.transactionId(),
+                        payload.transactionId(),
+                        payload);
         return objectMapper.writeValueAsString(envelope);
     }
 
@@ -80,12 +111,18 @@ class FraudDetectionTopologyBuilderTest {
 
         for (int i = 0; i < 4; i++) {
             input.advanceTime(Duration.ofSeconds(1));
-            input.pipeInput(UUID.randomUUID().toString(), transferCompletedMessage(customerId, new BigDecimal("10")));
+            input.pipeInput(
+                    UUID.randomUUID().toString(),
+                    transferCompletedMessage(customerId, new BigDecimal("10")));
         }
 
         List<String> alerts = output.readValuesToList();
-        assertThat(alerts).anySatisfy(json -> assertThat(json).contains("HIGH_TRANSFER_COUNT")
-                .contains(customerId));
+        assertThat(alerts)
+                .anySatisfy(
+                        json ->
+                                assertThat(json)
+                                        .contains("HIGH_TRANSFER_COUNT")
+                                        .contains(customerId));
     }
 
     @Test
@@ -93,13 +130,21 @@ class FraudDetectionTopologyBuilderTest {
         startDriver(100, "500");
         String customerId = UUID.randomUUID().toString();
 
-        input.pipeInput(UUID.randomUUID().toString(), transferCompletedMessage(customerId, new BigDecimal("300")));
+        input.pipeInput(
+                UUID.randomUUID().toString(),
+                transferCompletedMessage(customerId, new BigDecimal("300")));
         input.advanceTime(Duration.ofSeconds(1));
-        input.pipeInput(UUID.randomUUID().toString(), transferCompletedMessage(customerId, new BigDecimal("300")));
+        input.pipeInput(
+                UUID.randomUUID().toString(),
+                transferCompletedMessage(customerId, new BigDecimal("300")));
 
         List<String> alerts = output.readValuesToList();
-        assertThat(alerts).anySatisfy(json -> assertThat(json).contains("HIGH_TRANSFER_VALUE")
-                .contains(customerId));
+        assertThat(alerts)
+                .anySatisfy(
+                        json ->
+                                assertThat(json)
+                                        .contains("HIGH_TRANSFER_VALUE")
+                                        .contains(customerId));
         assertThat(alerts).noneMatch(json -> json.contains("HIGH_TRANSFER_COUNT"));
     }
 
@@ -108,9 +153,13 @@ class FraudDetectionTopologyBuilderTest {
         startDriver(5, "50000");
         String customerId = UUID.randomUUID().toString();
 
-        input.pipeInput(UUID.randomUUID().toString(), transferCompletedMessage(customerId, new BigDecimal("100")));
+        input.pipeInput(
+                UUID.randomUUID().toString(),
+                transferCompletedMessage(customerId, new BigDecimal("100")));
         input.advanceTime(Duration.ofSeconds(1));
-        input.pipeInput(UUID.randomUUID().toString(), transferCompletedMessage(customerId, new BigDecimal("100")));
+        input.pipeInput(
+                UUID.randomUUID().toString(),
+                transferCompletedMessage(customerId, new BigDecimal("100")));
 
         assertThat(output.isEmpty()).isTrue();
     }
@@ -118,12 +167,29 @@ class FraudDetectionTopologyBuilderTest {
     @Test
     void ignoresTransfersWithNoSourceCustomerId() {
         startDriver(1, "1");
-        TransferOutcomePayload payload = new TransferOutcomePayload(UUID.randomUUID().toString(),
-                UUID.randomUUID().toString(), UUID.randomUUID().toString(), null, null, new BigDecimal("999999"),
-                "INR", "Account not found");
-        EventEnvelope envelope = new EventEnvelope(UUID.randomUUID(), "transfer-completed", 1, Instant.now(),
-                "account-service", "corr-1", null, "Transfer", payload.transactionId(), payload.transactionId(),
-                payload);
+        TransferOutcomePayload payload =
+                new TransferOutcomePayload(
+                        UUID.randomUUID().toString(),
+                        UUID.randomUUID().toString(),
+                        UUID.randomUUID().toString(),
+                        null,
+                        null,
+                        new BigDecimal("999999"),
+                        "INR",
+                        "Account not found");
+        EventEnvelope envelope =
+                new EventEnvelope(
+                        UUID.randomUUID(),
+                        "transfer-completed",
+                        1,
+                        Instant.now(),
+                        "account-service",
+                        "corr-1",
+                        null,
+                        "Transfer",
+                        payload.transactionId(),
+                        payload.transactionId(),
+                        payload);
 
         input.pipeInput(UUID.randomUUID().toString(), objectMapper.writeValueAsString(envelope));
 

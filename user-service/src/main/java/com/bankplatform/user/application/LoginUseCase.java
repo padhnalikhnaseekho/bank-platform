@@ -26,8 +26,12 @@ public class LoginUseCase {
     private final OpaqueTokenGenerator opaqueTokenGenerator;
     private final EventPublisher eventPublisher;
 
-    public LoginUseCase(UserRepository userRepository, PasswordHasher passwordHasher, TokenIssuer tokenIssuer,
-            RefreshTokenRepository refreshTokenRepository, OpaqueTokenGenerator opaqueTokenGenerator,
+    public LoginUseCase(
+            UserRepository userRepository,
+            PasswordHasher passwordHasher,
+            TokenIssuer tokenIssuer,
+            RefreshTokenRepository refreshTokenRepository,
+            OpaqueTokenGenerator opaqueTokenGenerator,
             EventPublisher eventPublisher) {
         this.userRepository = userRepository;
         this.passwordHasher = passwordHasher;
@@ -37,17 +41,28 @@ public class LoginUseCase {
         this.eventPublisher = eventPublisher;
     }
 
-    public record Result(User user, String accessToken, String refreshToken, Instant refreshTokenExpiresAt) {}
+    public record Result(
+            User user, String accessToken, String refreshToken, Instant refreshTokenExpiresAt) {}
 
     @Transactional
     public Result login(String rawEmail, String rawPassword) {
         Email email = new Email(rawEmail);
-        User user = userRepository.findByEmail(email)
-                .filter(u -> passwordHasher.matches(rawPassword, u.credential().passwordHash()))
-                .orElseThrow(() -> {
-                    eventPublisher.publish("user-login-failed", "User", null, new UserLoginFailedPayload(rawEmail));
-                    return new UnauthorizedException("Invalid email or password");
-                });
+        User user =
+                userRepository
+                        .findByEmail(email)
+                        .filter(
+                                u ->
+                                        passwordHasher.matches(
+                                                rawPassword, u.credential().passwordHash()))
+                        .orElseThrow(
+                                () -> {
+                                    eventPublisher.publish(
+                                            "user-login-failed",
+                                            "User",
+                                            null,
+                                            new UserLoginFailedPayload(rawEmail));
+                                    return new UnauthorizedException("Invalid email or password");
+                                });
         if (!user.isActive()) {
             throw new UnauthorizedException("Account is not active");
         }
@@ -56,9 +71,11 @@ public class LoginUseCase {
         String rawRefreshToken = opaqueTokenGenerator.generate();
         Instant expiresAt = Instant.now().plus(REFRESH_TOKEN_TTL);
         refreshTokenRepository.save(
-                RefreshToken.issue(user.id(), OpaqueTokenGenerator.hash(rawRefreshToken), expiresAt));
+                RefreshToken.issue(
+                        user.id(), OpaqueTokenGenerator.hash(rawRefreshToken), expiresAt));
 
-        eventPublisher.publish("user-login-succeeded", "User", user.id().toString(), UserLoginPayload.from(user));
+        eventPublisher.publish(
+                "user-login-succeeded", "User", user.id().toString(), UserLoginPayload.from(user));
         return new Result(user, accessToken, rawRefreshToken, expiresAt);
     }
 }

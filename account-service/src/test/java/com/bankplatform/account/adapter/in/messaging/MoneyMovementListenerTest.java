@@ -21,11 +21,9 @@ import tools.jackson.databind.ObjectMapper;
 @ExtendWith(MockitoExtension.class)
 class MoneyMovementListenerTest {
 
-    @Mock
-    private ApplyMoneyMovementUseCase applyMoneyMovementUseCase;
+    @Mock private ApplyMoneyMovementUseCase applyMoneyMovementUseCase;
 
-    @Mock
-    private IdempotentEventProcessor idempotentEventProcessor;
+    @Mock private IdempotentEventProcessor idempotentEventProcessor;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -33,35 +31,63 @@ class MoneyMovementListenerTest {
 
     @BeforeEach
     void setUp() {
-        listener = new MoneyMovementListener(applyMoneyMovementUseCase, idempotentEventProcessor, objectMapper);
+        listener =
+                new MoneyMovementListener(
+                        applyMoneyMovementUseCase, idempotentEventProcessor, objectMapper);
     }
 
     private void stubProcessorToRunHandler() {
-        doAnswer(invocation -> {
-            Runnable handler = invocation.getArgument(2);
-            handler.run();
-            return null;
-        }).when(idempotentEventProcessor).process(any(), any(), any());
+        doAnswer(
+                        invocation -> {
+                            Runnable handler = invocation.getArgument(2);
+                            handler.run();
+                            return null;
+                        })
+                .when(idempotentEventProcessor)
+                .process(any(), any(), any());
     }
 
     private String toMessage(String eventType, Object payload, String aggregateId) {
-        EventEnvelope envelope = new EventEnvelope(UUID.randomUUID(), eventType, 1, Instant.now(),
-                "transaction-service", "corr-1", null, "Transaction", aggregateId, aggregateId, payload);
+        EventEnvelope envelope =
+                new EventEnvelope(
+                        UUID.randomUUID(),
+                        eventType,
+                        1,
+                        Instant.now(),
+                        "transaction-service",
+                        "corr-1",
+                        null,
+                        "Transaction",
+                        aggregateId,
+                        aggregateId,
+                        payload);
         return objectMapper.writeValueAsString(envelope);
     }
 
-    private record TransactionCreatedPayload(String transactionId, String type, String sourceAccountId,
-            String targetAccountId, BigDecimal amount, String currency) {}
+    private record TransactionCreatedPayload(
+            String transactionId,
+            String type,
+            String sourceAccountId,
+            String targetAccountId,
+            BigDecimal amount,
+            String currency) {}
 
     @Test
     void delegatesDepositsAndWithdrawalsToTheUseCase() {
         stubProcessorToRunHandler();
         String transactionId = UUID.randomUUID().toString();
         UUID accountId = UUID.randomUUID();
-        String message = toMessage("transaction-created",
-                new TransactionCreatedPayload(transactionId, "DEPOSIT", null, accountId.toString(),
-                        new BigDecimal("50.00"), "INR"),
-                accountId.toString());
+        String message =
+                toMessage(
+                        "transaction-created",
+                        new TransactionCreatedPayload(
+                                transactionId,
+                                "DEPOSIT",
+                                null,
+                                accountId.toString(),
+                                new BigDecimal("50.00"),
+                                "INR"),
+                        accountId.toString());
 
         listener.onTransactionCreated(message);
 
@@ -71,10 +97,17 @@ class MoneyMovementListenerTest {
     @Test
     void ignoresTransferEvents() {
         stubProcessorToRunHandler();
-        String message = toMessage("transaction-created",
-                new TransactionCreatedPayload(UUID.randomUUID().toString(), "TRANSFER", UUID.randomUUID().toString(),
-                        UUID.randomUUID().toString(), new BigDecimal("10.00"), "INR"),
-                UUID.randomUUID().toString());
+        String message =
+                toMessage(
+                        "transaction-created",
+                        new TransactionCreatedPayload(
+                                UUID.randomUUID().toString(),
+                                "TRANSFER",
+                                UUID.randomUUID().toString(),
+                                UUID.randomUUID().toString(),
+                                new BigDecimal("10.00"),
+                                "INR"),
+                        UUID.randomUUID().toString());
 
         listener.onTransactionCreated(message);
 
@@ -83,10 +116,17 @@ class MoneyMovementListenerTest {
 
     @Test
     void skipsAlreadyProcessedEvents() {
-        String message = toMessage("transaction-created",
-                new TransactionCreatedPayload(UUID.randomUUID().toString(), "DEPOSIT", null,
-                        UUID.randomUUID().toString(), new BigDecimal("10.00"), "INR"),
-                UUID.randomUUID().toString());
+        String message =
+                toMessage(
+                        "transaction-created",
+                        new TransactionCreatedPayload(
+                                UUID.randomUUID().toString(),
+                                "DEPOSIT",
+                                null,
+                                UUID.randomUUID().toString(),
+                                new BigDecimal("10.00"),
+                                "INR"),
+                        UUID.randomUUID().toString());
 
         listener.onTransactionCreated(message);
 

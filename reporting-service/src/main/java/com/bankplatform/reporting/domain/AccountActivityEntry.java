@@ -14,9 +14,14 @@ public record AccountActivityEntry(
         String currency,
         Instant occurredAt) {
 
-    public static AccountActivityEntry create(UUID customerId, UUID accountId, String eventType, BigDecimal amount,
-            String currency, Instant occurredAt) {
-        return new AccountActivityEntry(UUID.randomUUID(), customerId, accountId, eventType, amount, currency,
-                occurredAt);
+    public static AccountActivityEntry create(
+            UUID customerId,
+            UUID accountId,
+            String eventType,
+            BigDecimal amount,
+            String currency,
+            Instant occurredAt) {
+        return new AccountActivityEntry(
+                UUID.randomUUID(), customerId, accountId, eventType, amount, currency, occurredAt);
     }
 }

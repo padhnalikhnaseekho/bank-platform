@@ -21,18 +21,23 @@ public class SendNotificationUseCase {
     private final EventPublisher eventPublisher;
     private final Map<Channel, ChannelAdapter> adaptersByChannel;
 
-    public SendNotificationUseCase(NotificationRepository notificationRepository, EventPublisher eventPublisher,
+    public SendNotificationUseCase(
+            NotificationRepository notificationRepository,
+            EventPublisher eventPublisher,
             List<ChannelAdapter> channelAdapters) {
         this.notificationRepository = notificationRepository;
         this.eventPublisher = eventPublisher;
-        this.adaptersByChannel = channelAdapters.stream()
-                .collect(Collectors.toMap(ChannelAdapter::channel, Function.identity()));
+        this.adaptersByChannel =
+                channelAdapters.stream()
+                        .collect(Collectors.toMap(ChannelAdapter::channel, Function.identity()));
     }
 
     @Transactional
     public void send(UUID recipientUserId, Channel channel, String template, String message) {
-        Notification notification = Notification.create(recipientUserId, channel, template, message);
-        ChannelAdapter.DeliveryResult result = adaptersByChannel.get(channel).send(recipientUserId, message);
+        Notification notification =
+                Notification.create(recipientUserId, channel, template, message);
+        ChannelAdapter.DeliveryResult result =
+                adaptersByChannel.get(channel).send(recipientUserId, message);
 
         if (result.success()) {
             notification.markSent();
@@ -40,12 +45,18 @@ public class SendNotificationUseCase {
             notification.markFailed();
         }
         Notification saved = notificationRepository.save(notification);
-        notificationRepository
-                .saveDeliveryAttempt(DeliveryAttempt.of(saved.id(), result.success(), result.failureReason()));
+        notificationRepository.saveDeliveryAttempt(
+                DeliveryAttempt.of(saved.id(), result.success(), result.failureReason()));
 
         String eventType = result.success() ? "notification-sent" : "notification-failed";
-        eventPublisher.publish(eventType, "Notification", saved.id().toString(),
-                new NotificationOutcomePayload(saved.id().toString(), recipientUserId.toString(), channel.name(),
+        eventPublisher.publish(
+                eventType,
+                "Notification",
+                saved.id().toString(),
+                new NotificationOutcomePayload(
+                        saved.id().toString(),
+                        recipientUserId.toString(),
+                        channel.name(),
                         template));
     }
 }

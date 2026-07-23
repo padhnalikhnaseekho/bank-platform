@@ -29,7 +29,8 @@ public class PaymentController {
     private final CreateRecurringPaymentUseCase createRecurringPaymentUseCase;
     private final CancelPaymentUseCase cancelPaymentUseCase;
 
-    public PaymentController(CreateScheduledPaymentUseCase createScheduledPaymentUseCase,
+    public PaymentController(
+            CreateScheduledPaymentUseCase createScheduledPaymentUseCase,
             CreateRecurringPaymentUseCase createRecurringPaymentUseCase,
             CancelPaymentUseCase cancelPaymentUseCase) {
         this.createScheduledPaymentUseCase = createScheduledPaymentUseCase;
@@ -39,28 +40,45 @@ public class PaymentController {
 
     @PostMapping("/scheduled")
     public ResponseEntity<PaymentInstructionResponse> createScheduled(
-            @Valid @RequestBody CreateScheduledPaymentRequest request, @AuthenticationPrincipal Jwt jwt) {
+            @Valid @RequestBody CreateScheduledPaymentRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
         UUID customerId = UUID.fromString(jwt.getSubject());
         Money amount = Money.of(request.amount(), request.currency());
-        var instruction = createScheduledPaymentUseCase.execute(customerId, request.sourceAccountId(),
-                request.payeeAccountId(), amount, request.runAt());
-        return ResponseEntity.status(HttpStatus.CREATED).body(PaymentInstructionResponse.from(instruction));
+        var instruction =
+                createScheduledPaymentUseCase.execute(
+                        customerId,
+                        request.sourceAccountId(),
+                        request.payeeAccountId(),
+                        amount,
+                        request.runAt());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(PaymentInstructionResponse.from(instruction));
     }
 
     @PostMapping("/recurring")
     public ResponseEntity<PaymentInstructionResponse> createRecurring(
-            @Valid @RequestBody CreateRecurringPaymentRequest request, @AuthenticationPrincipal Jwt jwt) {
+            @Valid @RequestBody CreateRecurringPaymentRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
         UUID customerId = UUID.fromString(jwt.getSubject());
         Money amount = Money.of(request.amount(), request.currency());
-        var instruction = createRecurringPaymentUseCase.execute(customerId, request.sourceAccountId(),
-                request.payeeAccountId(), amount, request.startAt(), request.intervalDays());
-        return ResponseEntity.status(HttpStatus.CREATED).body(PaymentInstructionResponse.from(instruction));
+        var instruction =
+                createRecurringPaymentUseCase.execute(
+                        customerId,
+                        request.sourceAccountId(),
+                        request.payeeAccountId(),
+                        amount,
+                        request.startAt(),
+                        request.intervalDays());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(PaymentInstructionResponse.from(instruction));
     }
 
     @PostMapping("/{paymentId}/cancel")
-    public PaymentInstructionResponse cancel(@PathVariable UUID paymentId, @AuthenticationPrincipal Jwt jwt) {
-        var instruction = cancelPaymentUseCase.execute(PaymentId.of(paymentId), UUID.fromString(jwt.getSubject()),
-                isAdmin(jwt));
+    public PaymentInstructionResponse cancel(
+            @PathVariable UUID paymentId, @AuthenticationPrincipal Jwt jwt) {
+        var instruction =
+                cancelPaymentUseCase.execute(
+                        PaymentId.of(paymentId), UUID.fromString(jwt.getSubject()), isAdmin(jwt));
         return PaymentInstructionResponse.from(instruction);
     }
 

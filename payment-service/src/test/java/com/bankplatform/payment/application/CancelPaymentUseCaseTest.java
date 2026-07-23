@@ -27,11 +27,9 @@ import org.springframework.security.access.AccessDeniedException;
 @ExtendWith(MockitoExtension.class)
 class CancelPaymentUseCaseTest {
 
-    @Mock
-    private PaymentInstructionRepository paymentInstructionRepository;
+    @Mock private PaymentInstructionRepository paymentInstructionRepository;
 
-    @Mock
-    private EventPublisher eventPublisher;
+    @Mock private EventPublisher eventPublisher;
 
     private CancelPaymentUseCase useCase;
 
@@ -41,16 +39,22 @@ class CancelPaymentUseCaseTest {
     }
 
     private PaymentInstruction anActiveInstruction(UUID customerId) {
-        return PaymentInstruction.create(customerId, UUID.randomUUID(), UUID.randomUUID(),
-                Money.of(new BigDecimal("50"), "INR"), PaymentSchedule.oneTime(Instant.now().plusSeconds(3600)));
+        return PaymentInstruction.create(
+                customerId,
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                Money.of(new BigDecimal("50"), "INR"),
+                PaymentSchedule.oneTime(Instant.now().plusSeconds(3600)));
     }
 
     @Test
     void ownerCanCancelTheirOwnPayment() {
         UUID customerId = UUID.randomUUID();
         PaymentInstruction instruction = anActiveInstruction(customerId);
-        when(paymentInstructionRepository.findById(instruction.id())).thenReturn(Optional.of(instruction));
-        when(paymentInstructionRepository.save(any(PaymentInstruction.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(paymentInstructionRepository.findById(instruction.id()))
+                .thenReturn(Optional.of(instruction));
+        when(paymentInstructionRepository.save(any(PaymentInstruction.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
 
         PaymentInstruction result = useCase.execute(instruction.id(), customerId, false);
 
@@ -60,8 +64,10 @@ class CancelPaymentUseCaseTest {
     @Test
     void adminCanCancelAnyPayment() {
         PaymentInstruction instruction = anActiveInstruction(UUID.randomUUID());
-        when(paymentInstructionRepository.findById(instruction.id())).thenReturn(Optional.of(instruction));
-        when(paymentInstructionRepository.save(any(PaymentInstruction.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(paymentInstructionRepository.findById(instruction.id()))
+                .thenReturn(Optional.of(instruction));
+        when(paymentInstructionRepository.save(any(PaymentInstruction.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
 
         PaymentInstruction result = useCase.execute(instruction.id(), UUID.randomUUID(), true);
 
@@ -71,7 +77,8 @@ class CancelPaymentUseCaseTest {
     @Test
     void rejectsCancellingSomeoneElsesPayment() {
         PaymentInstruction instruction = anActiveInstruction(UUID.randomUUID());
-        when(paymentInstructionRepository.findById(instruction.id())).thenReturn(Optional.of(instruction));
+        when(paymentInstructionRepository.findById(instruction.id()))
+                .thenReturn(Optional.of(instruction));
 
         assertThatThrownBy(() -> useCase.execute(instruction.id(), UUID.randomUUID(), false))
                 .isInstanceOf(AccessDeniedException.class);

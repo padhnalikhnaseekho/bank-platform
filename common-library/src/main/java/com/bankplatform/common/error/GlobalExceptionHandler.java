@@ -39,18 +39,20 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Covers both manually-thrown {@link AccessDeniedException} and Spring Security 7's
-     * {@code AuthorizationDeniedException} (thrown by {@code @PreAuthorize}, which extends
-     * this type). Method-security denials happen inside the controller invocation, which
-     * Spring MVC's own exception resolvers claim before the exception ever reaches the
-     * servlet-filter-level {@code AccessDeniedHandler} bean.
+     * Covers both manually-thrown {@link AccessDeniedException} and Spring Security 7's {@code
+     * AuthorizationDeniedException} (thrown by {@code @PreAuthorize}, which extends this type).
+     * Method-security denials happen inside the controller invocation, which Spring MVC's own
+     * exception resolvers claim before the exception ever reaches the servlet-filter-level {@code
+     * AccessDeniedHandler} bean.
      */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException ex) {
         return build(HttpStatus.FORBIDDEN, "FORBIDDEN", "Access is denied", List.of());
     }
 
-    /** Missing/malformed required headers, params, and path variables — a client error, not a 500. */
+    /**
+     * Missing/malformed required headers, params, and path variables — a client error, not a 500.
+     */
     @ExceptionHandler(ServletRequestBindingException.class)
     public ResponseEntity<ApiError> handleBindingException(ServletRequestBindingException ex) {
         return build(HttpStatus.BAD_REQUEST, "BAD_REQUEST", ex.getMessage(), List.of());
@@ -58,19 +60,31 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleBeanValidation(MethodArgumentNotValidException ex) {
-        List<ApiError.FieldViolation> details = ex.getBindingResult().getFieldErrors().stream()
-                .map(fe -> new ApiError.FieldViolation(fe.getField(), fe.getDefaultMessage()))
-                .toList();
-        return build(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "Request validation failed", details);
+        List<ApiError.FieldViolation> details =
+                ex.getBindingResult().getFieldErrors().stream()
+                        .map(
+                                fe ->
+                                        new ApiError.FieldViolation(
+                                                fe.getField(), fe.getDefaultMessage()))
+                        .toList();
+        return build(
+                HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "Request validation failed", details);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleUnexpected(Exception ex) {
         log.error("Unhandled exception", ex);
-        return build(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "An unexpected error occurred", List.of());
+        return build(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "INTERNAL_ERROR",
+                "An unexpected error occurred",
+                List.of());
     }
 
-    private ResponseEntity<ApiError> build(HttpStatus status, String errorCode, String message,
+    private ResponseEntity<ApiError> build(
+            HttpStatus status,
+            String errorCode,
+            String message,
             List<ApiError.FieldViolation> details) {
         String correlationId = MDC.get(CorrelationIdFilter.MDC_KEY);
         ApiError body = ApiError.of(status.value(), errorCode, message, correlationId, details);

@@ -16,22 +16,32 @@ public class CreateWithdrawalUseCase {
     private final TransactionRepository transactionRepository;
     private final EventPublisher eventPublisher;
 
-    public CreateWithdrawalUseCase(TransactionRepository transactionRepository, EventPublisher eventPublisher) {
+    public CreateWithdrawalUseCase(
+            TransactionRepository transactionRepository, EventPublisher eventPublisher) {
         this.transactionRepository = transactionRepository;
         this.eventPublisher = eventPublisher;
     }
 
     @Transactional
     public Transaction execute(UUID customerId, UUID accountId, Money amount) {
-        Transaction transaction = Transaction.receive(customerId, TransactionType.WITHDRAWAL, amount, accountId,
-                null);
+        Transaction transaction =
+                Transaction.receive(
+                        customerId, TransactionType.WITHDRAWAL, amount, accountId, null);
         transaction.validate();
         transaction.markProcessing();
         Transaction saved = transactionRepository.save(transaction);
 
-        eventPublisher.publish("transaction-created", "Transaction", saved.id().toString(),
-                new TransactionEventPayload(saved.id().toString(), "WITHDRAWAL", accountId.toString(), null,
-                        amount.amount(), amount.currency().getCurrencyCode()));
+        eventPublisher.publish(
+                "transaction-created",
+                "Transaction",
+                saved.id().toString(),
+                new TransactionEventPayload(
+                        saved.id().toString(),
+                        "WITHDRAWAL",
+                        accountId.toString(),
+                        null,
+                        amount.amount(),
+                        amount.currency().getCurrencyCode()));
         return saved;
     }
 }

@@ -13,8 +13,14 @@ public class CsvStatementRenderer {
     public byte[] render(List<AccountActivityEntry> entries) {
         StringBuilder csv = new StringBuilder(HEADER);
         for (AccountActivityEntry entry : entries) {
-            csv.append(escape(entry.eventType())).append(',').append(entry.amount()).append(',')
-                    .append(escape(entry.currency())).append(',').append(entry.occurredAt()).append('\n');
+            csv.append(escape(entry.eventType()))
+                    .append(',')
+                    .append(entry.amount())
+                    .append(',')
+                    .append(escape(entry.currency()))
+                    .append(',')
+                    .append(entry.occurredAt())
+                    .append('\n');
         }
         return csv.toString().getBytes(StandardCharsets.UTF_8);
     }

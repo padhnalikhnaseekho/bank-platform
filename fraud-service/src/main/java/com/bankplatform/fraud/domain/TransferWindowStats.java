@@ -3,9 +3,9 @@ package com.bankplatform.fraud.domain;
 import java.math.BigDecimal;
 
 /**
- * Running count and outgoing total for one customer within one sliding window. Assumes a
- * single currency per customer (this platform is INR-only in practice) — {@code currency}
- * simply tracks the most recently seen value rather than modeling mixed-currency totals.
+ * Running count and outgoing total for one customer within one sliding window. Assumes a single
+ * currency per customer (this platform is INR-only in practice) — {@code currency} simply tracks
+ * the most recently seen value rather than modeling mixed-currency totals.
  */
 public record TransferWindowStats(long count, BigDecimal totalAmount, String currency) {
 

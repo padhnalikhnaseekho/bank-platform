@@ -13,8 +13,14 @@ public class Notification {
     private NotificationStatus status;
     private final Instant createdAt;
 
-    public Notification(NotificationId id, UUID recipientUserId, Channel channel, String template, String message,
-            NotificationStatus status, Instant createdAt) {
+    public Notification(
+            NotificationId id,
+            UUID recipientUserId,
+            Channel channel,
+            String template,
+            String message,
+            NotificationStatus status,
+            Instant createdAt) {
         this.id = id;
         this.recipientUserId = recipientUserId;
         this.channel = channel;
@@ -24,9 +30,16 @@ public class Notification {
         this.createdAt = createdAt;
     }
 
-    public static Notification create(UUID recipientUserId, Channel channel, String template, String message) {
-        return new Notification(NotificationId.newId(), recipientUserId, channel, template, message,
-                NotificationStatus.PENDING, Instant.now());
+    public static Notification create(
+            UUID recipientUserId, Channel channel, String template, String message) {
+        return new Notification(
+                NotificationId.newId(),
+                recipientUserId,
+                channel,
+                template,
+                message,
+                NotificationStatus.PENDING,
+                Instant.now());
     }
 
     public void markSent() {

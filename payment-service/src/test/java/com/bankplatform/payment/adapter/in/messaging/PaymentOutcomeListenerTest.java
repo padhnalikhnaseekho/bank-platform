@@ -23,39 +23,66 @@ import tools.jackson.databind.ObjectMapper;
 @ExtendWith(MockitoExtension.class)
 class PaymentOutcomeListenerTest {
 
-    @Mock
-    private ApplyPaymentOutcomeUseCase applyPaymentOutcomeUseCase;
+    @Mock private ApplyPaymentOutcomeUseCase applyPaymentOutcomeUseCase;
 
-    @Mock
-    private IdempotentEventProcessor idempotentEventProcessor;
+    @Mock private IdempotentEventProcessor idempotentEventProcessor;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private PaymentOutcomeListener listener;
 
-    private record TransferOutcomePayload(String transactionId, String sourceAccountId, String targetAccountId,
-            String sourceCustomerId, String targetCustomerId, BigDecimal amount, String currency,
+    private record TransferOutcomePayload(
+            String transactionId,
+            String sourceAccountId,
+            String targetAccountId,
+            String sourceCustomerId,
+            String targetCustomerId,
+            BigDecimal amount,
+            String currency,
             String failureReason) {}
 
     @BeforeEach
     void setUp() {
-        listener = new PaymentOutcomeListener(applyPaymentOutcomeUseCase, idempotentEventProcessor, objectMapper);
+        listener =
+                new PaymentOutcomeListener(
+                        applyPaymentOutcomeUseCase, idempotentEventProcessor, objectMapper);
     }
 
     private void stubProcessorToRunHandler() {
-        doAnswer(invocation -> {
-            Runnable handler = invocation.getArgument(2);
-            handler.run();
-            return null;
-        }).when(idempotentEventProcessor).process(any(), any(), any());
+        doAnswer(
+                        invocation -> {
+                            Runnable handler = invocation.getArgument(2);
+                            handler.run();
+                            return null;
+                        })
+                .when(idempotentEventProcessor)
+                .process(any(), any(), any());
     }
 
     private String toMessage(String eventType, UUID transactionId, String failureReason) {
-        TransferOutcomePayload payload = new TransferOutcomePayload(transactionId.toString(),
-                UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString(),
-                UUID.randomUUID().toString(), new BigDecimal("50.00"), "INR", failureReason);
-        EventEnvelope envelope = new EventEnvelope(UUID.randomUUID(), eventType, 1, Instant.now(), "account-service",
-                "corr-1", null, "Transfer", transactionId.toString(), transactionId.toString(), payload);
+        TransferOutcomePayload payload =
+                new TransferOutcomePayload(
+                        transactionId.toString(),
+                        UUID.randomUUID().toString(),
+                        UUID.randomUUID().toString(),
+                        UUID.randomUUID().toString(),
+                        UUID.randomUUID().toString(),
+                        new BigDecimal("50.00"),
+                        "INR",
+                        failureReason);
+        EventEnvelope envelope =
+                new EventEnvelope(
+                        UUID.randomUUID(),
+                        eventType,
+                        1,
+                        Instant.now(),
+                        "account-service",
+                        "corr-1",
+                        null,
+                        "Transfer",
+                        transactionId.toString(),
+                        transactionId.toString(),
+                        payload);
         return objectMapper.writeValueAsString(envelope);
     }
 
@@ -74,9 +101,11 @@ class PaymentOutcomeListenerTest {
         stubProcessorToRunHandler();
         UUID transactionId = UUID.randomUUID();
 
-        listener.onTransferFailed(toMessage("transfer-failed", transactionId, "Insufficient funds"));
+        listener.onTransferFailed(
+                toMessage("transfer-failed", transactionId, "Insufficient funds"));
 
-        verify(applyPaymentOutcomeUseCase).execute(eq(transactionId), eq(false), eq("Insufficient funds"));
+        verify(applyPaymentOutcomeUseCase)
+                .execute(eq(transactionId), eq(false), eq("Insufficient funds"));
     }
 
     @Test

@@ -21,7 +21,8 @@ public class PaymentInstructionRepositoryAdapter implements PaymentInstructionRe
 
     @Override
     public PaymentInstruction save(PaymentInstruction instruction) {
-        PaymentInstructionEntity saved = jpaRepository.save(PaymentInstructionMapper.toEntity(instruction));
+        PaymentInstructionEntity saved =
+                jpaRepository.save(PaymentInstructionMapper.toEntity(instruction));
         return PaymentInstructionMapper.toDomain(saved);
     }
 
@@ -33,8 +34,10 @@ public class PaymentInstructionRepositoryAdapter implements PaymentInstructionRe
     @Override
     public List<PaymentInstruction> findDue(Instant now, int limit) {
         return jpaRepository
-                .findByStatusAndNextRunAtLessThanEqualOrderByNextRunAtAsc(PaymentStatus.ACTIVE.name(), now,
-                        PageRequest.of(0, limit))
-                .stream().map(PaymentInstructionMapper::toDomain).toList();
+                .findByStatusAndNextRunAtLessThanEqualOrderByNextRunAtAsc(
+                        PaymentStatus.ACTIVE.name(), now, PageRequest.of(0, limit))
+                .stream()
+                .map(PaymentInstructionMapper::toDomain)
+                .toList();
     }
 }

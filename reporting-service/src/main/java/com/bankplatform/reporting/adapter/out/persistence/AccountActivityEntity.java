@@ -12,8 +12,7 @@ import java.util.UUID;
 @Table(name = "account_activity_view")
 public class AccountActivityEntity {
 
-    @Id
-    private UUID id;
+    @Id private UUID id;
 
     @Column(name = "customer_id", nullable = false)
     private UUID customerId;
@@ -35,8 +34,14 @@ public class AccountActivityEntity {
 
     protected AccountActivityEntity() {}
 
-    public AccountActivityEntity(UUID id, UUID customerId, UUID accountId, String eventType, BigDecimal amount,
-            String currency, Instant occurredAt) {
+    public AccountActivityEntity(
+            UUID id,
+            UUID customerId,
+            UUID accountId,
+            String eventType,
+            BigDecimal amount,
+            String currency,
+            Instant occurredAt) {
         this.id = id;
         this.customerId = customerId;
         this.accountId = accountId;

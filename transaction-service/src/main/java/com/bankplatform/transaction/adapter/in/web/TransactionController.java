@@ -38,9 +38,12 @@ public class TransactionController {
     private final GetTransactionUseCase getTransactionUseCase;
     private final IdempotencyGuard idempotencyGuard;
 
-    public TransactionController(CreateDepositUseCase createDepositUseCase,
-            CreateWithdrawalUseCase createWithdrawalUseCase, CreateTransferUseCase createTransferUseCase,
-            GetTransactionUseCase getTransactionUseCase, IdempotencyGuard idempotencyGuard) {
+    public TransactionController(
+            CreateDepositUseCase createDepositUseCase,
+            CreateWithdrawalUseCase createWithdrawalUseCase,
+            CreateTransferUseCase createTransferUseCase,
+            GetTransactionUseCase getTransactionUseCase,
+            IdempotencyGuard idempotencyGuard) {
         this.createDepositUseCase = createDepositUseCase;
         this.createWithdrawalUseCase = createWithdrawalUseCase;
         this.createTransferUseCase = createTransferUseCase;
@@ -49,40 +52,70 @@ public class TransactionController {
     }
 
     @PostMapping("/deposits")
-    public ResponseEntity<TransactionResult> deposit(@RequestHeader("Idempotency-Key") String idempotencyKey,
-            @Valid @RequestBody DepositRequest request, @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<TransactionResult> deposit(
+            @RequestHeader("Idempotency-Key") String idempotencyKey,
+            @Valid @RequestBody DepositRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
         UUID customerId = UUID.fromString(jwt.getSubject());
         Money amount = Money.of(request.amount(), request.currency());
-        TransactionResult result = idempotencyGuard.execute(idempotencyKey, request, () -> TransactionResult
-                .from(createDepositUseCase.execute(customerId, request.accountId(), amount)));
+        TransactionResult result =
+                idempotencyGuard.execute(
+                        idempotencyKey,
+                        request,
+                        () ->
+                                TransactionResult.from(
+                                        createDepositUseCase.execute(
+                                                customerId, request.accountId(), amount)));
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(result);
     }
 
     @PostMapping("/withdrawals")
-    public ResponseEntity<TransactionResult> withdraw(@RequestHeader("Idempotency-Key") String idempotencyKey,
-            @Valid @RequestBody WithdrawalRequest request, @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<TransactionResult> withdraw(
+            @RequestHeader("Idempotency-Key") String idempotencyKey,
+            @Valid @RequestBody WithdrawalRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
         UUID customerId = UUID.fromString(jwt.getSubject());
         Money amount = Money.of(request.amount(), request.currency());
-        TransactionResult result = idempotencyGuard.execute(idempotencyKey, request, () -> TransactionResult
-                .from(createWithdrawalUseCase.execute(customerId, request.accountId(), amount)));
+        TransactionResult result =
+                idempotencyGuard.execute(
+                        idempotencyKey,
+                        request,
+                        () ->
+                                TransactionResult.from(
+                                        createWithdrawalUseCase.execute(
+                                                customerId, request.accountId(), amount)));
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(result);
     }
 
     @PostMapping("/transfers")
-    public ResponseEntity<TransactionResult> transfer(@RequestHeader("Idempotency-Key") String idempotencyKey,
-            @Valid @RequestBody TransferRequest request, @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<TransactionResult> transfer(
+            @RequestHeader("Idempotency-Key") String idempotencyKey,
+            @Valid @RequestBody TransferRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
         UUID customerId = UUID.fromString(jwt.getSubject());
         Money amount = Money.of(request.amount(), request.currency());
-        TransactionResult result = idempotencyGuard.execute(idempotencyKey, request,
-                () -> TransactionResult.from(createTransferUseCase.execute(customerId, request.sourceAccountId(),
-                        request.targetAccountId(), amount)));
+        TransactionResult result =
+                idempotencyGuard.execute(
+                        idempotencyKey,
+                        request,
+                        () ->
+                                TransactionResult.from(
+                                        createTransferUseCase.execute(
+                                                customerId,
+                                                request.sourceAccountId(),
+                                                request.targetAccountId(),
+                                                amount)));
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(result);
     }
 
     @GetMapping("/{transactionId}")
-    public TransactionResponse get(@PathVariable UUID transactionId, @AuthenticationPrincipal Jwt jwt) {
-        Transaction transaction = getTransactionUseCase.getById(TransactionId.of(transactionId),
-                UUID.fromString(jwt.getSubject()), isAdmin(jwt));
+    public TransactionResponse get(
+            @PathVariable UUID transactionId, @AuthenticationPrincipal Jwt jwt) {
+        Transaction transaction =
+                getTransactionUseCase.getById(
+                        TransactionId.of(transactionId),
+                        UUID.fromString(jwt.getSubject()),
+                        isAdmin(jwt));
         return TransactionResponse.from(transaction);
     }
 

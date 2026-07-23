@@ -17,20 +17,33 @@ public class CreateScheduledPaymentUseCase {
     private final PaymentInstructionRepository paymentInstructionRepository;
     private final EventPublisher eventPublisher;
 
-    public CreateScheduledPaymentUseCase(PaymentInstructionRepository paymentInstructionRepository,
+    public CreateScheduledPaymentUseCase(
+            PaymentInstructionRepository paymentInstructionRepository,
             EventPublisher eventPublisher) {
         this.paymentInstructionRepository = paymentInstructionRepository;
         this.eventPublisher = eventPublisher;
     }
 
     @Transactional
-    public PaymentInstruction execute(UUID customerId, UUID sourceAccountId, UUID payeeAccountId, Money amount,
+    public PaymentInstruction execute(
+            UUID customerId,
+            UUID sourceAccountId,
+            UUID payeeAccountId,
+            Money amount,
             Instant runAt) {
-        PaymentInstruction instruction = PaymentInstruction.create(customerId, sourceAccountId, payeeAccountId,
-                amount, PaymentSchedule.oneTime(runAt));
+        PaymentInstruction instruction =
+                PaymentInstruction.create(
+                        customerId,
+                        sourceAccountId,
+                        payeeAccountId,
+                        amount,
+                        PaymentSchedule.oneTime(runAt));
         PaymentInstruction saved = paymentInstructionRepository.save(instruction);
 
-        eventPublisher.publish("payment-created", "PaymentInstruction", saved.id().toString(),
+        eventPublisher.publish(
+                "payment-created",
+                "PaymentInstruction",
+                saved.id().toString(),
                 PaymentCreatedPayload.from(saved));
         return saved;
     }

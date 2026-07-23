@@ -21,8 +21,7 @@ import org.springframework.data.domain.Pageable;
 @ExtendWith(MockitoExtension.class)
 class SearchAuditEventsUseCaseTest {
 
-    @Mock
-    private AuditEventRepository auditEventRepository;
+    @Mock private AuditEventRepository auditEventRepository;
 
     private SearchAuditEventsUseCase useCase;
 
@@ -33,13 +32,21 @@ class SearchAuditEventsUseCaseTest {
 
     @Test
     void delegatesSearchCriteriaToTheRepository() {
-        AuditEvent event = AuditEvent.capture(UUID.randomUUID(), "account-created", "Account", "acc-1", "{}", "c-1",
-                Instant.now());
+        AuditEvent event =
+                AuditEvent.capture(
+                        UUID.randomUUID(),
+                        "account-created",
+                        "Account",
+                        "acc-1",
+                        "{}",
+                        "c-1",
+                        Instant.now());
         Pageable pageable = PageRequest.of(0, 20);
         Instant from = Instant.now().minusSeconds(60);
         Instant to = Instant.now();
         Page<AuditEvent> page = new PageImpl<>(java.util.List.of(event));
-        when(auditEventRepository.search("acc-1", "account-created", from, to, pageable)).thenReturn(page);
+        when(auditEventRepository.search("acc-1", "account-created", from, to, pageable))
+                .thenReturn(page);
 
         Page<AuditEvent> result = useCase.search("acc-1", "account-created", from, to, pageable);
 

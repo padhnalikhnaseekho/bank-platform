@@ -11,8 +11,7 @@ import java.util.UUID;
 @Table(name = "processed_events")
 public class ProcessedEventEntity {
 
-    @Id
-    private UUID eventId;
+    @Id private UUID eventId;
 
     @Column(name = "event_type", nullable = false)
     private String eventType;

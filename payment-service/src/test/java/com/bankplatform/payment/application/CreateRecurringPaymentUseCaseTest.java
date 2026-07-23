@@ -25,11 +25,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class CreateRecurringPaymentUseCaseTest {
 
-    @Mock
-    private PaymentInstructionRepository paymentInstructionRepository;
+    @Mock private PaymentInstructionRepository paymentInstructionRepository;
 
-    @Mock
-    private EventPublisher eventPublisher;
+    @Mock private EventPublisher eventPublisher;
 
     private CreateRecurringPaymentUseCase useCase;
 
@@ -48,13 +46,17 @@ class CreateRecurringPaymentUseCaseTest {
         Instant startAt = Instant.now().plusSeconds(60);
         Money amount = Money.of(new BigDecimal("1000.00"), "INR");
 
-        PaymentInstruction result = useCase.execute(customerId, sourceAccountId, payeeAccountId, amount, startAt,
-                30);
+        PaymentInstruction result =
+                useCase.execute(customerId, sourceAccountId, payeeAccountId, amount, startAt, 30);
 
         assertThat(result.status()).isEqualTo(PaymentStatus.ACTIVE);
         assertThat(result.schedule().type()).isEqualTo(ScheduleType.RECURRING);
         assertThat(result.schedule().intervalDays()).isEqualTo(30);
-        verify(eventPublisher).publish(eq("payment-created"), eq("PaymentInstruction"),
-                eq(result.id().toString()), eq(PaymentCreatedPayload.from(result)));
+        verify(eventPublisher)
+                .publish(
+                        eq("payment-created"),
+                        eq("PaymentInstruction"),
+                        eq(result.id().toString()),
+                        eq(PaymentCreatedPayload.from(result)));
     }
 }

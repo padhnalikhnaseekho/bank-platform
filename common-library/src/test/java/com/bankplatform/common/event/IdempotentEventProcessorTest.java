@@ -17,11 +17,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class IdempotentEventProcessorTest {
 
-    @Mock
-    private ProcessedEventStore processedEventStore;
+    @Mock private ProcessedEventStore processedEventStore;
 
-    @Mock
-    private Runnable handler;
+    @Mock private Runnable handler;
 
     private IdempotentEventProcessor processor;
 

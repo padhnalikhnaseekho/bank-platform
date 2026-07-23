@@ -19,15 +19,27 @@ class PaymentInstructionTest {
     void rejectsSourceAndPayeeBeingTheSameAccount() {
         UUID accountId = UUID.randomUUID();
 
-        assertThatThrownBy(() -> PaymentInstruction.create(UUID.randomUUID(), accountId, accountId, amount,
-                PaymentSchedule.oneTime(Instant.now()))).isInstanceOf(ValidationException.class);
+        assertThatThrownBy(
+                        () ->
+                                PaymentInstruction.create(
+                                        UUID.randomUUID(),
+                                        accountId,
+                                        accountId,
+                                        amount,
+                                        PaymentSchedule.oneTime(Instant.now())))
+                .isInstanceOf(ValidationException.class);
     }
 
     @Test
     void isDueOnlyWhenActiveAndNextRunAtHasPassed() {
         Instant past = Instant.now().minusSeconds(60);
-        PaymentInstruction instruction = PaymentInstruction.create(UUID.randomUUID(), UUID.randomUUID(),
-                UUID.randomUUID(), amount, PaymentSchedule.oneTime(past));
+        PaymentInstruction instruction =
+                PaymentInstruction.create(
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        amount,
+                        PaymentSchedule.oneTime(past));
 
         assertThat(instruction.isDue(Instant.now())).isTrue();
     }
@@ -35,16 +47,26 @@ class PaymentInstructionTest {
     @Test
     void isNotDueBeforeNextRunAt() {
         Instant future = Instant.now().plusSeconds(3600);
-        PaymentInstruction instruction = PaymentInstruction.create(UUID.randomUUID(), UUID.randomUUID(),
-                UUID.randomUUID(), amount, PaymentSchedule.oneTime(future));
+        PaymentInstruction instruction =
+                PaymentInstruction.create(
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        amount,
+                        PaymentSchedule.oneTime(future));
 
         assertThat(instruction.isDue(Instant.now())).isFalse();
     }
 
     @Test
     void oneTimePaymentCompletesAfterItsAttemptIsTriggered() {
-        PaymentInstruction instruction = PaymentInstruction.create(UUID.randomUUID(), UUID.randomUUID(),
-                UUID.randomUUID(), amount, PaymentSchedule.oneTime(Instant.now()));
+        PaymentInstruction instruction =
+                PaymentInstruction.create(
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        amount,
+                        PaymentSchedule.oneTime(Instant.now()));
 
         instruction.recordAttemptTriggered();
 
@@ -54,19 +76,30 @@ class PaymentInstructionTest {
     @Test
     void recurringPaymentStaysActiveAndAdvancesToItsNextOccurrence() {
         Instant firstRun = Instant.now().minusSeconds(60);
-        PaymentInstruction instruction = PaymentInstruction.create(UUID.randomUUID(), UUID.randomUUID(),
-                UUID.randomUUID(), amount, PaymentSchedule.recurring(firstRun, 30));
+        PaymentInstruction instruction =
+                PaymentInstruction.create(
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        amount,
+                        PaymentSchedule.recurring(firstRun, 30));
 
         instruction.recordAttemptTriggered();
 
         assertThat(instruction.status()).isEqualTo(PaymentStatus.ACTIVE);
-        assertThat(instruction.schedule().nextRunAt()).isEqualTo(firstRun.plus(Duration.ofDays(30)));
+        assertThat(instruction.schedule().nextRunAt())
+                .isEqualTo(firstRun.plus(Duration.ofDays(30)));
     }
 
     @Test
     void cancelMarksAnActivePaymentCancelled() {
-        PaymentInstruction instruction = PaymentInstruction.create(UUID.randomUUID(), UUID.randomUUID(),
-                UUID.randomUUID(), amount, PaymentSchedule.oneTime(Instant.now()));
+        PaymentInstruction instruction =
+                PaymentInstruction.create(
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        amount,
+                        PaymentSchedule.oneTime(Instant.now()));
 
         instruction.cancel();
 
@@ -75,8 +108,13 @@ class PaymentInstructionTest {
 
     @Test
     void rejectsCancellingAnAlreadyCancelledPayment() {
-        PaymentInstruction instruction = PaymentInstruction.create(UUID.randomUUID(), UUID.randomUUID(),
-                UUID.randomUUID(), amount, PaymentSchedule.oneTime(Instant.now()));
+        PaymentInstruction instruction =
+                PaymentInstruction.create(
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        amount,
+                        PaymentSchedule.oneTime(Instant.now()));
         instruction.cancel();
 
         assertThatThrownBy(instruction::cancel).isInstanceOf(ConflictException.class);
@@ -84,8 +122,13 @@ class PaymentInstructionTest {
 
     @Test
     void rejectsCancellingACompletedPayment() {
-        PaymentInstruction instruction = PaymentInstruction.create(UUID.randomUUID(), UUID.randomUUID(),
-                UUID.randomUUID(), amount, PaymentSchedule.oneTime(Instant.now()));
+        PaymentInstruction instruction =
+                PaymentInstruction.create(
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        amount,
+                        PaymentSchedule.oneTime(Instant.now()));
         instruction.recordAttemptTriggered();
 
         assertThatThrownBy(instruction::cancel).isInstanceOf(ConflictException.class);

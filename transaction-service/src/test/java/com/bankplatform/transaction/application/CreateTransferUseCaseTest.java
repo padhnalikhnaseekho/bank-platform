@@ -25,11 +25,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class CreateTransferUseCaseTest {
 
-    @Mock
-    private TransactionRepository transactionRepository;
+    @Mock private TransactionRepository transactionRepository;
 
-    @Mock
-    private EventPublisher eventPublisher;
+    @Mock private EventPublisher eventPublisher;
 
     private CreateTransferUseCase useCase;
 
@@ -40,7 +38,8 @@ class CreateTransferUseCaseTest {
 
     @Test
     void createsAndPersistsAProcessingTransfer() {
-        when(transactionRepository.save(any(Transaction.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(transactionRepository.save(any(Transaction.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
         UUID customerId = UUID.randomUUID();
         UUID sourceAccountId = UUID.randomUUID();
         UUID targetAccountId = UUID.randomUUID();
@@ -51,9 +50,18 @@ class CreateTransferUseCaseTest {
         assertThat(result.status()).isEqualTo(TransactionStatus.PROCESSING);
         assertThat(result.sourceAccountId()).isEqualTo(sourceAccountId);
         assertThat(result.targetAccountId()).isEqualTo(targetAccountId);
-        verify(eventPublisher).publish("transfer-started", "Transaction", result.id().toString(),
-                new TransactionEventPayload(result.id().toString(), "TRANSFER", sourceAccountId.toString(),
-                        targetAccountId.toString(), amount.amount(), "INR"));
+        verify(eventPublisher)
+                .publish(
+                        "transfer-started",
+                        "Transaction",
+                        result.id().toString(),
+                        new TransactionEventPayload(
+                                result.id().toString(),
+                                "TRANSFER",
+                                sourceAccountId.toString(),
+                                targetAccountId.toString(),
+                                amount.amount(),
+                                "INR"));
     }
 
     @Test

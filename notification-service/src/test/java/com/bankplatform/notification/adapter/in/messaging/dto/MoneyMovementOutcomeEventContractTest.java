@@ -8,9 +8,8 @@ import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
 
 /**
- * Verifies notification-service can still read the shared money-deposited/money-withdrawn
- * contract fixtures published by account-service (see
- * MoneyMovementOutcomePayloadContractTest there).
+ * Verifies notification-service can still read the shared money-deposited/money-withdrawn contract
+ * fixtures published by account-service (see MoneyMovementOutcomePayloadContractTest there).
  */
 class MoneyMovementOutcomeEventContractTest {
 
@@ -18,8 +17,9 @@ class MoneyMovementOutcomeEventContractTest {
 
     @Test
     void deserializesMoneyDepositedContract() {
-        MoneyMovementOutcomeEvent event = objectMapper.readValue(ContractFixtures.read("money-deposited"),
-                MoneyMovementOutcomeEvent.class);
+        MoneyMovementOutcomeEvent event =
+                objectMapper.readValue(
+                        ContractFixtures.read("money-deposited"), MoneyMovementOutcomeEvent.class);
 
         assertThat(event.transactionId()).isEqualTo("3d2a1b0c-9e8f-4d7c-b6a5-4938271605f4");
         assertThat(event.accountId()).isEqualTo("b3816b1d-8760-4f2e-9b6e-2b1f8f5d9a01");
@@ -30,8 +30,9 @@ class MoneyMovementOutcomeEventContractTest {
 
     @Test
     void deserializesMoneyWithdrawnContract() {
-        MoneyMovementOutcomeEvent event = objectMapper.readValue(ContractFixtures.read("money-withdrawn"),
-                MoneyMovementOutcomeEvent.class);
+        MoneyMovementOutcomeEvent event =
+                objectMapper.readValue(
+                        ContractFixtures.read("money-withdrawn"), MoneyMovementOutcomeEvent.class);
 
         assertThat(event.status()).isEqualTo("FAILED");
         assertThat(event.failureReason()).isEqualTo("INSUFFICIENT_FUNDS");

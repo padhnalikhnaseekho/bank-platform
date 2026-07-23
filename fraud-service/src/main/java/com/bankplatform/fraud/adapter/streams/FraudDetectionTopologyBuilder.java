@@ -24,9 +24,9 @@ import org.apache.kafka.streams.state.WindowStore;
 import tools.jackson.databind.ObjectMapper;
 
 /**
- * Pure topology-building logic, kept free of Spring so it can be exercised directly with
- * {@code TopologyTestDriver} in tests without a Spring context. {@link FraudStreamsConfig}
- * wires this into the Spring-managed {@link StreamsBuilder}.
+ * Pure topology-building logic, kept free of Spring so it can be exercised directly with {@code
+ * TopologyTestDriver} in tests without a Spring context. {@link FraudStreamsConfig} wires this into
+ * the Spring-managed {@link StreamsBuilder}.
  */
 public final class FraudDetectionTopologyBuilder {
 
@@ -36,31 +36,43 @@ public final class FraudDetectionTopologyBuilder {
 
     private FraudDetectionTopologyBuilder() {}
 
-    public static void build(StreamsBuilder streamsBuilder, ObjectMapper objectMapper, List<FraudRule> rules,
+    public static void build(
+            StreamsBuilder streamsBuilder,
+            ObjectMapper objectMapper,
+            List<FraudRule> rules,
             Duration window) {
-        JsonSerde<TransferOutcomeEvent> transferSerde = new JsonSerde<>(TransferOutcomeEvent.class, objectMapper);
-        JsonSerde<TransferWindowStats> statsSerde = new JsonSerde<>(TransferWindowStats.class, objectMapper);
+        JsonSerde<TransferOutcomeEvent> transferSerde =
+                new JsonSerde<>(TransferOutcomeEvent.class, objectMapper);
+        JsonSerde<TransferWindowStats> statsSerde =
+                new JsonSerde<>(TransferWindowStats.class, objectMapper);
 
-        KStream<String, String> transfers = streamsBuilder.stream(INPUT_TOPIC,
-                Consumed.with(Serdes.String(), Serdes.String()));
+        KStream<String, String> transfers =
+                streamsBuilder.stream(INPUT_TOPIC, Consumed.with(Serdes.String(), Serdes.String()));
 
-        KStream<String, TransferOutcomeEvent> outgoingTransfers = transfers
-                .mapValues(value -> extractPayload(objectMapper, value))
-                .filter((transactionId, event) -> event != null && event.sourceCustomerId() != null)
-                .selectKey((transactionId, event) -> event.sourceCustomerId());
+        KStream<String, TransferOutcomeEvent> outgoingTransfers =
+                transfers
+                        .mapValues(value -> extractPayload(objectMapper, value))
+                        .filter(
+                                (transactionId, event) ->
+                                        event != null && event.sourceCustomerId() != null)
+                        .selectKey((transactionId, event) -> event.sourceCustomerId());
 
-        KTable<Windowed<String>, TransferWindowStats> windowedStats = outgoingTransfers
-                .groupByKey(Grouped.with(Serdes.String(), transferSerde))
-                .windowedBy(SlidingWindows.ofTimeDifferenceWithNoGrace(window))
-                .aggregate(TransferWindowStats::zero,
-                        (customerId, event, stats) -> stats.plus(event.amount(), event.currency()),
-                        Materialized
-                                .<String, TransferWindowStats, WindowStore<Bytes, byte[]>>as(
-                                        "transfer-window-stats-store")
-                                .withKeySerde(Serdes.String())
-                                .withValueSerde(statsSerde));
+        KTable<Windowed<String>, TransferWindowStats> windowedStats =
+                outgoingTransfers
+                        .groupByKey(Grouped.with(Serdes.String(), transferSerde))
+                        .windowedBy(SlidingWindows.ofTimeDifferenceWithNoGrace(window))
+                        .aggregate(
+                                TransferWindowStats::zero,
+                                (customerId, event, stats) ->
+                                        stats.plus(event.amount(), event.currency()),
+                                Materialized
+                                        .<String, TransferWindowStats, WindowStore<Bytes, byte[]>>
+                                                as("transfer-window-stats-store")
+                                        .withKeySerde(Serdes.String())
+                                        .withValueSerde(statsSerde));
 
-        windowedStats.toStream()
+        windowedStats
+                .toStream()
                 .flatMap((windowedKey, stats) -> evaluateRules(rules, windowedKey, stats))
                 .mapValues(alert -> toEnvelopeJson(objectMapper, alert))
                 .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.String()));
@@ -83,8 +95,19 @@ public final class FraudDetectionTopologyBuilder {
     }
 
     private static String toEnvelopeJson(ObjectMapper objectMapper, FraudAlert alert) {
-        EventEnvelope envelope = new EventEnvelope(UUID.randomUUID(), "fraud-alert", 1, alert.triggeredAt(),
-                PRODUCER_NAME, null, null, "Customer", alert.customerId(), alert.customerId(), alert);
+        EventEnvelope envelope =
+                new EventEnvelope(
+                        UUID.randomUUID(),
+                        "fraud-alert",
+                        1,
+                        alert.triggeredAt(),
+                        PRODUCER_NAME,
+                        null,
+                        null,
+                        "Customer",
+                        alert.customerId(),
+                        alert.customerId(),
+                        alert);
         return objectMapper.writeValueAsString(envelope);
     }
 }

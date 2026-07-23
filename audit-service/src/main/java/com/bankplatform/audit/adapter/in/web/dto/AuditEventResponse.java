@@ -16,7 +16,15 @@ public record AuditEventResponse(
         Instant storedAt) {
 
     public static AuditEventResponse from(AuditEvent event) {
-        return new AuditEventResponse(event.id(), event.eventId(), event.eventType(), event.aggregateType(),
-                event.aggregateId(), event.payload(), event.correlationId(), event.occurredAt(), event.storedAt());
+        return new AuditEventResponse(
+                event.id(),
+                event.eventId(),
+                event.eventType(),
+                event.aggregateType(),
+                event.aggregateId(),
+                event.payload(),
+                event.correlationId(),
+                event.occurredAt(),
+                event.storedAt());
     }
 }

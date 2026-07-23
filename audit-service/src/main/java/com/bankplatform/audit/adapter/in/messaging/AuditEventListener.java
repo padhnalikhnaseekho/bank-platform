@@ -16,23 +16,46 @@ public class AuditEventListener {
     private final IdempotentEventProcessor idempotentEventProcessor;
     private final ObjectMapper objectMapper;
 
-    public AuditEventListener(RecordAuditEventUseCase recordAuditEventUseCase,
-            IdempotentEventProcessor idempotentEventProcessor, ObjectMapper objectMapper) {
+    public AuditEventListener(
+            RecordAuditEventUseCase recordAuditEventUseCase,
+            IdempotentEventProcessor idempotentEventProcessor,
+            ObjectMapper objectMapper) {
         this.recordAuditEventUseCase = recordAuditEventUseCase;
         this.idempotentEventProcessor = idempotentEventProcessor;
         this.objectMapper = objectMapper;
     }
 
-    @KafkaListener(topics = { "user-created", "user-login-succeeded", "user-login-failed", "account-created",
-            "account-frozen", "money-deposited", "money-withdrawn", "transfer-started", "transfer-completed",
-            "transfer-failed", "transaction-created", "transaction-status-changed", "notification-requested",
-            "notification-sent", "notification-failed", "fraud-alert" })
+    @KafkaListener(
+            topics = {
+                "user-created",
+                "user-login-succeeded",
+                "user-login-failed",
+                "account-created",
+                "account-frozen",
+                "money-deposited",
+                "money-withdrawn",
+                "transfer-started",
+                "transfer-completed",
+                "transfer-failed",
+                "transaction-created",
+                "transaction-status-changed",
+                "notification-requested",
+                "notification-sent",
+                "notification-failed",
+                "fraud-alert"
+            })
     public void onEvent(String message) {
         EventEnvelope envelope = objectMapper.readValue(message, EventEnvelope.class);
-        EventProcessingContext.withCorrelation(envelope, () -> idempotentEventProcessor.process(envelope.eventId(),
-                envelope.eventType(), () -> {
-                    String payloadJson = objectMapper.writeValueAsString(envelope.payload());
-                    recordAuditEventUseCase.record(envelope, payloadJson);
-                }));
+        EventProcessingContext.withCorrelation(
+                envelope,
+                () ->
+                        idempotentEventProcessor.process(
+                                envelope.eventId(),
+                                envelope.eventType(),
+                                () -> {
+                                    String payloadJson =
+                                            objectMapper.writeValueAsString(envelope.payload());
+                                    recordAuditEventUseCase.record(envelope, payloadJson);
+                                }));
     }
 }

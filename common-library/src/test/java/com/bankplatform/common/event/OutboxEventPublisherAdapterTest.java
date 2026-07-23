@@ -17,8 +17,7 @@ import tools.jackson.databind.ObjectMapper;
 @ExtendWith(MockitoExtension.class)
 class OutboxEventPublisherAdapterTest {
 
-    @Mock
-    private OutboxRepository outboxRepository;
+    @Mock private OutboxRepository outboxRepository;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -34,7 +33,8 @@ class OutboxEventPublisherAdapterTest {
         adapter = new OutboxEventPublisherAdapter(outboxRepository, objectMapper);
         UUID accountId = UUID.randomUUID();
 
-        adapter.publish("account-created", "Account", accountId.toString(), new TestPayload("alice"));
+        adapter.publish(
+                "account-created", "Account", accountId.toString(), new TestPayload("alice"));
 
         ArgumentCaptor<OutboxRecord> captor = ArgumentCaptor.forClass(OutboxRecord.class);
         verify(outboxRepository).save(captor.capture());
@@ -55,7 +55,8 @@ class OutboxEventPublisherAdapterTest {
         adapter = new OutboxEventPublisherAdapter(outboxRepository, objectMapper);
         MDC.put(CorrelationIdFilter.MDC_KEY, "corr-123");
 
-        adapter.publish("account-created", "Account", UUID.randomUUID().toString(), new TestPayload("bob"));
+        adapter.publish(
+                "account-created", "Account", UUID.randomUUID().toString(), new TestPayload("bob"));
 
         ArgumentCaptor<OutboxRecord> captor = ArgumentCaptor.forClass(OutboxRecord.class);
         verify(outboxRepository).save(captor.capture());

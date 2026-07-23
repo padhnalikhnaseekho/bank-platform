@@ -24,9 +24,12 @@ public class GenerateStatementUseCase {
     private final CsvStatementRenderer csvStatementRenderer;
     private final PdfStatementRenderer pdfStatementRenderer;
 
-    public GenerateStatementUseCase(AccountActivityRepository accountActivityRepository,
-            StatementJobRepository statementJobRepository, ReportStorage reportStorage,
-            CsvStatementRenderer csvStatementRenderer, PdfStatementRenderer pdfStatementRenderer) {
+    public GenerateStatementUseCase(
+            AccountActivityRepository accountActivityRepository,
+            StatementJobRepository statementJobRepository,
+            ReportStorage reportStorage,
+            CsvStatementRenderer csvStatementRenderer,
+            PdfStatementRenderer pdfStatementRenderer) {
         this.accountActivityRepository = accountActivityRepository;
         this.statementJobRepository = statementJobRepository;
         this.reportStorage = reportStorage;
@@ -35,13 +38,15 @@ public class GenerateStatementUseCase {
     }
 
     @Transactional
-    public StatementJob execute(UUID customerId, UUID accountId, Instant periodStart, Instant periodEnd) {
+    public StatementJob execute(
+            UUID customerId, UUID accountId, Instant periodStart, Instant periodEnd) {
         StatementJob job = StatementJob.request(customerId, accountId, periodStart, periodEnd);
         StatementJob saved = statementJobRepository.save(job);
 
         try {
-            List<AccountActivityEntry> entries = accountActivityRepository.findByAccountAndPeriod(accountId,
-                    periodStart, periodEnd);
+            List<AccountActivityEntry> entries =
+                    accountActivityRepository.findByAccountAndPeriod(
+                            accountId, periodStart, periodEnd);
             byte[] csv = csvStatementRenderer.render(entries);
             byte[] pdf = pdfStatementRenderer.render(saved, entries);
 

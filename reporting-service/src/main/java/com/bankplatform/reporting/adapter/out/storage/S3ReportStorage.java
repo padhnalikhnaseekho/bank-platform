@@ -13,7 +13,8 @@ public class S3ReportStorage implements ReportStorage {
     private final S3Client s3Client;
     private final String bucket;
 
-    public S3ReportStorage(S3Client s3Client, @Value("${bank-platform.reports.s3.bucket}") String bucket) {
+    public S3ReportStorage(
+            S3Client s3Client, @Value("${bank-platform.reports.s3.bucket}") String bucket) {
         this.s3Client = s3Client;
         this.bucket = bucket;
     }

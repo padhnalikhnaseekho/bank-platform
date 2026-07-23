@@ -17,7 +17,12 @@ public class LedgerEntry {
     private final String referenceId;
     private final Instant createdAt;
 
-    public LedgerEntry(UUID id, AccountId accountId, EntryType entryType, Money amount, String referenceId,
+    public LedgerEntry(
+            UUID id,
+            AccountId accountId,
+            EntryType entryType,
+            Money amount,
+            String referenceId,
             Instant createdAt) {
         this.id = id;
         this.accountId = accountId;
@@ -27,8 +32,10 @@ public class LedgerEntry {
         this.createdAt = createdAt;
     }
 
-    public static LedgerEntry of(AccountId accountId, EntryType entryType, Money amount, String referenceId) {
-        return new LedgerEntry(UUID.randomUUID(), accountId, entryType, amount, referenceId, Instant.now());
+    public static LedgerEntry of(
+            AccountId accountId, EntryType entryType, Money amount, String referenceId) {
+        return new LedgerEntry(
+                UUID.randomUUID(), accountId, entryType, amount, referenceId, Instant.now());
     }
 
     public UUID id() {

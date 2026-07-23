@@ -11,7 +11,8 @@ public class RefreshToken {
     private final Instant expiresAt;
     private Instant revokedAt;
 
-    public RefreshToken(UUID id, UserId userId, String tokenHash, Instant expiresAt, Instant revokedAt) {
+    public RefreshToken(
+            UUID id, UserId userId, String tokenHash, Instant expiresAt, Instant revokedAt) {
         this.id = id;
         this.userId = userId;
         this.tokenHash = tokenHash;

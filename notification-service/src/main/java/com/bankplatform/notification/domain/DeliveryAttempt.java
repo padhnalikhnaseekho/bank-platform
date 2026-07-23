@@ -11,7 +11,11 @@ public class DeliveryAttempt {
     private final String failureReason;
     private final Instant attemptedAt;
 
-    public DeliveryAttempt(UUID id, NotificationId notificationId, boolean success, String failureReason,
+    public DeliveryAttempt(
+            UUID id,
+            NotificationId notificationId,
+            boolean success,
+            String failureReason,
             Instant attemptedAt) {
         this.id = id;
         this.notificationId = notificationId;
@@ -20,8 +24,10 @@ public class DeliveryAttempt {
         this.attemptedAt = attemptedAt;
     }
 
-    public static DeliveryAttempt of(NotificationId notificationId, boolean success, String failureReason) {
-        return new DeliveryAttempt(UUID.randomUUID(), notificationId, success, failureReason, Instant.now());
+    public static DeliveryAttempt of(
+            NotificationId notificationId, boolean success, String failureReason) {
+        return new DeliveryAttempt(
+                UUID.randomUUID(), notificationId, success, failureReason, Instant.now());
     }
 
     public UUID id() {

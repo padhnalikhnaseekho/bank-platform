@@ -23,11 +23,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class FreezeAccountUseCaseTest {
 
-    @Mock
-    private AccountRepository accountRepository;
+    @Mock private AccountRepository accountRepository;
 
-    @Mock
-    private EventPublisher eventPublisher;
+    @Mock private EventPublisher eventPublisher;
 
     private FreezeAccountUseCase useCase;
 
@@ -38,7 +36,8 @@ class FreezeAccountUseCaseTest {
 
     @Test
     void freezesExistingAccount() {
-        Account account = Account.open(UUID.randomUUID(), "123456789012", AccountType.SAVINGS, "INR");
+        Account account =
+                Account.open(UUID.randomUUID(), "123456789012", AccountType.SAVINGS, "INR");
         AccountId id = account.id();
         when(accountRepository.findById(id)).thenReturn(Optional.of(account));
         when(accountRepository.save(any(Account.class))).thenAnswer(inv -> inv.getArgument(0));

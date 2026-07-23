@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Each service implements this against its own {@code outbox_events} table (no shared
- * JPA entities across services). {@link OutboxEventPublisherAdapter} writes through it
- * inside the caller's existing transaction; {@link OutboxPublisherJob} polls it.
+ * Each service implements this against its own {@code outbox_events} table (no shared JPA entities
+ * across services). {@link OutboxEventPublisherAdapter} writes through it inside the caller's
+ * existing transaction; {@link OutboxPublisherJob} polls it.
  */
 public interface OutboxRepository {
 

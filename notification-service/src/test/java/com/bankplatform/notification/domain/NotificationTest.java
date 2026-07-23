@@ -11,7 +11,8 @@ class NotificationTest {
     void createsAPendingNotification() {
         UUID recipientId = UUID.randomUUID();
 
-        Notification notification = Notification.create(recipientId, Channel.EMAIL, "welcome", "hi");
+        Notification notification =
+                Notification.create(recipientId, Channel.EMAIL, "welcome", "hi");
 
         assertThat(notification.recipientUserId()).isEqualTo(recipientId);
         assertThat(notification.channel()).isEqualTo(Channel.EMAIL);
@@ -20,7 +21,8 @@ class NotificationTest {
 
     @Test
     void marksSent() {
-        Notification notification = Notification.create(UUID.randomUUID(), Channel.SMS, "otp", "123456");
+        Notification notification =
+                Notification.create(UUID.randomUUID(), Channel.SMS, "otp", "123456");
 
         notification.markSent();
 
@@ -29,7 +31,8 @@ class NotificationTest {
 
     @Test
     void marksFailed() {
-        Notification notification = Notification.create(UUID.randomUUID(), Channel.PUSH, "alert", "text");
+        Notification notification =
+                Notification.create(UUID.randomUUID(), Channel.PUSH, "alert", "text");
 
         notification.markFailed();
 

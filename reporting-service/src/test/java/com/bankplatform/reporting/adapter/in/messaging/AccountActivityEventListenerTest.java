@@ -22,51 +22,91 @@ import tools.jackson.databind.ObjectMapper;
 @ExtendWith(MockitoExtension.class)
 class AccountActivityEventListenerTest {
 
-    @Mock
-    private RecordAccountActivityUseCase recordAccountActivityUseCase;
+    @Mock private RecordAccountActivityUseCase recordAccountActivityUseCase;
 
-    @Mock
-    private IdempotentEventProcessor idempotentEventProcessor;
+    @Mock private IdempotentEventProcessor idempotentEventProcessor;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private AccountActivityEventListener listener;
 
-    private record AccountCreatedPayload(String accountId, String customerId, String accountNumber, String type,
-            String status, BigDecimal balance, String currency) {}
+    private record AccountCreatedPayload(
+            String accountId,
+            String customerId,
+            String accountNumber,
+            String type,
+            String status,
+            BigDecimal balance,
+            String currency) {}
 
-    private record MoneyMovementPayload(String transactionId, String accountId, String customerId,
-            BigDecimal amount, String currency, String status, String failureReason) {}
+    private record MoneyMovementPayload(
+            String transactionId,
+            String accountId,
+            String customerId,
+            BigDecimal amount,
+            String currency,
+            String status,
+            String failureReason) {}
 
-    private record TransferPayload(String transactionId, String sourceAccountId, String targetAccountId,
-            String sourceCustomerId, String targetCustomerId, BigDecimal amount, String currency,
+    private record TransferPayload(
+            String transactionId,
+            String sourceAccountId,
+            String targetAccountId,
+            String sourceCustomerId,
+            String targetCustomerId,
+            BigDecimal amount,
+            String currency,
             String failureReason) {}
 
     @BeforeEach
     void setUp() {
-        listener = new AccountActivityEventListener(recordAccountActivityUseCase, idempotentEventProcessor,
-                objectMapper);
+        listener =
+                new AccountActivityEventListener(
+                        recordAccountActivityUseCase, idempotentEventProcessor, objectMapper);
     }
 
     private void stubProcessorToRunHandler() {
-        doAnswer(invocation -> {
-            Runnable handler = invocation.getArgument(2);
-            handler.run();
-            return null;
-        }).when(idempotentEventProcessor).process(any(), any(), any());
+        doAnswer(
+                        invocation -> {
+                            Runnable handler = invocation.getArgument(2);
+                            handler.run();
+                            return null;
+                        })
+                .when(idempotentEventProcessor)
+                .process(any(), any(), any());
     }
 
     private String toMessage(String eventType, Object payload) {
-        EventEnvelope envelope = new EventEnvelope(UUID.randomUUID(), eventType, 1, Instant.now(), "producer",
-                "corr-1", null, "Aggregate", "agg-1", "agg-1", payload);
+        EventEnvelope envelope =
+                new EventEnvelope(
+                        UUID.randomUUID(),
+                        eventType,
+                        1,
+                        Instant.now(),
+                        "producer",
+                        "corr-1",
+                        null,
+                        "Aggregate",
+                        "agg-1",
+                        "agg-1",
+                        payload);
         return objectMapper.writeValueAsString(envelope);
     }
 
     @Test
     void delegatesAccountCreatedToTheUseCase() {
         stubProcessorToRunHandler();
-        String message = toMessage("account-created", new AccountCreatedPayload(UUID.randomUUID().toString(),
-                UUID.randomUUID().toString(), "123456789012", "SAVINGS", "ACTIVE", BigDecimal.ZERO, "INR"));
+        String message =
+                toMessage(
+                        "account-created",
+                        new AccountCreatedPayload(
+                                UUID.randomUUID().toString(),
+                                UUID.randomUUID().toString(),
+                                "123456789012",
+                                "SAVINGS",
+                                "ACTIVE",
+                                BigDecimal.ZERO,
+                                "INR"));
 
         listener.onAccountCreated(message);
 
@@ -76,9 +116,17 @@ class AccountActivityEventListenerTest {
     @Test
     void delegatesMoneyDepositedToTheUseCaseWithTheDepositEventType() {
         stubProcessorToRunHandler();
-        String message = toMessage("money-deposited",
-                new MoneyMovementPayload(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
-                        UUID.randomUUID().toString(), new BigDecimal("50.00"), "INR", "COMPLETED", null));
+        String message =
+                toMessage(
+                        "money-deposited",
+                        new MoneyMovementPayload(
+                                UUID.randomUUID().toString(),
+                                UUID.randomUUID().toString(),
+                                UUID.randomUUID().toString(),
+                                new BigDecimal("50.00"),
+                                "INR",
+                                "COMPLETED",
+                                null));
 
         listener.onMoneyDeposited(message);
 
@@ -88,9 +136,17 @@ class AccountActivityEventListenerTest {
     @Test
     void delegatesMoneyWithdrawnToTheUseCaseWithTheWithdrawalEventType() {
         stubProcessorToRunHandler();
-        String message = toMessage("money-withdrawn",
-                new MoneyMovementPayload(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
-                        UUID.randomUUID().toString(), new BigDecimal("50.00"), "INR", "COMPLETED", null));
+        String message =
+                toMessage(
+                        "money-withdrawn",
+                        new MoneyMovementPayload(
+                                UUID.randomUUID().toString(),
+                                UUID.randomUUID().toString(),
+                                UUID.randomUUID().toString(),
+                                new BigDecimal("50.00"),
+                                "INR",
+                                "COMPLETED",
+                                null));
 
         listener.onMoneyWithdrawn(message);
 
@@ -100,10 +156,18 @@ class AccountActivityEventListenerTest {
     @Test
     void delegatesTransferCompletedToTheUseCase() {
         stubProcessorToRunHandler();
-        String message = toMessage("transfer-completed",
-                new TransferPayload(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
-                        UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString(),
-                        new BigDecimal("40.00"), "INR", null));
+        String message =
+                toMessage(
+                        "transfer-completed",
+                        new TransferPayload(
+                                UUID.randomUUID().toString(),
+                                UUID.randomUUID().toString(),
+                                UUID.randomUUID().toString(),
+                                UUID.randomUUID().toString(),
+                                UUID.randomUUID().toString(),
+                                new BigDecimal("40.00"),
+                                "INR",
+                                null));
 
         listener.onTransferCompleted(message);
 
@@ -112,8 +176,17 @@ class AccountActivityEventListenerTest {
 
     @Test
     void skipsAlreadyProcessedEvents() {
-        String message = toMessage("account-created", new AccountCreatedPayload(UUID.randomUUID().toString(),
-                UUID.randomUUID().toString(), "123456789012", "SAVINGS", "ACTIVE", BigDecimal.ZERO, "INR"));
+        String message =
+                toMessage(
+                        "account-created",
+                        new AccountCreatedPayload(
+                                UUID.randomUUID().toString(),
+                                UUID.randomUUID().toString(),
+                                "123456789012",
+                                "SAVINGS",
+                                "ACTIVE",
+                                BigDecimal.ZERO,
+                                "INR"));
 
         listener.onAccountCreated(message);
 

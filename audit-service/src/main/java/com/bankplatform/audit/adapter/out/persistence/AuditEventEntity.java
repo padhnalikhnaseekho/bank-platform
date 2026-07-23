@@ -11,8 +11,7 @@ import java.util.UUID;
 @Table(name = "audit_events")
 public class AuditEventEntity {
 
-    @Id
-    private UUID id;
+    @Id private UUID id;
 
     @Column(name = "event_id", nullable = false)
     private UUID eventId;
@@ -40,8 +39,16 @@ public class AuditEventEntity {
 
     protected AuditEventEntity() {}
 
-    public AuditEventEntity(UUID id, UUID eventId, String eventType, String aggregateType, String aggregateId,
-            String payload, String headers, Instant occurredAt, Instant storedAt) {
+    public AuditEventEntity(
+            UUID id,
+            UUID eventId,
+            String eventType,
+            String aggregateType,
+            String aggregateId,
+            String payload,
+            String headers,
+            Instant occurredAt,
+            Instant storedAt) {
         this.id = id;
         this.eventId = eventId;
         this.eventType = eventType;

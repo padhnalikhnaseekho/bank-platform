@@ -8,9 +8,8 @@ import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
 
 /**
- * Verifies reporting-service can still read the shared transfer-completed/transfer-failed
- * contract fixtures published by account-service (see
- * TransferOutcomePayloadContractTest there).
+ * Verifies reporting-service can still read the shared transfer-completed/transfer-failed contract
+ * fixtures published by account-service (see TransferOutcomePayloadContractTest there).
  */
 class TransferOutcomeEventContractTest {
 
@@ -18,8 +17,9 @@ class TransferOutcomeEventContractTest {
 
     @Test
     void deserializesTransferCompletedContract() {
-        TransferOutcomeEvent event = objectMapper.readValue(ContractFixtures.read("transfer-completed"),
-                TransferOutcomeEvent.class);
+        TransferOutcomeEvent event =
+                objectMapper.readValue(
+                        ContractFixtures.read("transfer-completed"), TransferOutcomeEvent.class);
 
         assertThat(event.sourceCustomerId()).isEqualTo("d1a2b3c4-d5e6-4f70-8a91-0b1c2d3e4f50");
         assertThat(event.targetCustomerId()).isEqualTo("e2b3c4d5-e6f7-4081-9ba2-1c2d3e4f5061");

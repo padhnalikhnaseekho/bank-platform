@@ -26,8 +26,10 @@ public class NotificationEventListener {
     private final IdempotentEventProcessor idempotentEventProcessor;
     private final ObjectMapper objectMapper;
 
-    public NotificationEventListener(SendNotificationUseCase sendNotificationUseCase,
-            IdempotentEventProcessor idempotentEventProcessor, ObjectMapper objectMapper) {
+    public NotificationEventListener(
+            SendNotificationUseCase sendNotificationUseCase,
+            IdempotentEventProcessor idempotentEventProcessor,
+            ObjectMapper objectMapper) {
         this.sendNotificationUseCase = sendNotificationUseCase;
         this.idempotentEventProcessor = idempotentEventProcessor;
         this.objectMapper = objectMapper;
@@ -35,11 +37,17 @@ public class NotificationEventListener {
 
     @KafkaListener(topics = "user-created")
     public void onUserCreated(String message) {
-        withIdempotency(message, envelope -> {
-            UserCreatedEvent event = objectMapper.convertValue(envelope.payload(), UserCreatedEvent.class);
-            sendNotificationUseCase.send(UUID.fromString(event.userId()), Channel.EMAIL, "welcome",
-                    "Welcome to Bank Platform, " + event.fullName() + "!");
-        });
+        withIdempotency(
+                message,
+                envelope -> {
+                    UserCreatedEvent event =
+                            objectMapper.convertValue(envelope.payload(), UserCreatedEvent.class);
+                    sendNotificationUseCase.send(
+                            UUID.fromString(event.userId()),
+                            Channel.EMAIL,
+                            "welcome",
+                            "Welcome to Bank Platform, " + event.fullName() + "!");
+                });
     }
 
     @KafkaListener(topics = "money-deposited")
@@ -64,56 +72,94 @@ public class NotificationEventListener {
 
     @KafkaListener(topics = "fraud-alert")
     public void onFraudAlert(String message) {
-        withIdempotency(message, envelope -> {
-            FraudAlertEvent event = objectMapper.convertValue(envelope.payload(), FraudAlertEvent.class);
-            sendNotificationUseCase.send(UUID.fromString(event.customerId()), Channel.EMAIL, "fraud-alert",
-                    event.message());
-        });
+        withIdempotency(
+                message,
+                envelope -> {
+                    FraudAlertEvent event =
+                            objectMapper.convertValue(envelope.payload(), FraudAlertEvent.class);
+                    sendNotificationUseCase.send(
+                            UUID.fromString(event.customerId()),
+                            Channel.EMAIL,
+                            "fraud-alert",
+                            event.message());
+                });
     }
 
     @KafkaListener(topics = "notification-requested")
     public void onNotificationRequested(String message) {
-        withIdempotency(message, envelope -> {
-            NotificationRequestedEvent event = objectMapper.convertValue(envelope.payload(),
-                    NotificationRequestedEvent.class);
-            sendNotificationUseCase.send(UUID.fromString(event.recipientUserId()), Channel.valueOf(event.channel()),
-                    event.template(), event.message());
-        });
+        withIdempotency(
+                message,
+                envelope -> {
+                    NotificationRequestedEvent event =
+                            objectMapper.convertValue(
+                                    envelope.payload(), NotificationRequestedEvent.class);
+                    sendNotificationUseCase.send(
+                            UUID.fromString(event.recipientUserId()),
+                            Channel.valueOf(event.channel()),
+                            event.template(),
+                            event.message());
+                });
     }
 
     private void handleMoneyMovement(String message, String template) {
-        withIdempotency(message, envelope -> {
-            MoneyMovementOutcomeEvent event = objectMapper.convertValue(envelope.payload(),
-                    MoneyMovementOutcomeEvent.class);
-            if (event.customerId() == null) {
-                log.warn("No customerId on {} for transaction {}; skipping notification", envelope.eventType(),
-                        event.transactionId());
-                return;
-            }
-            String text = String.format("%s of %s %s — %s", template, event.amount(), event.currency(),
-                    event.status());
-            sendNotificationUseCase.send(UUID.fromString(event.customerId()), Channel.EMAIL, template, text);
-        });
+        withIdempotency(
+                message,
+                envelope -> {
+                    MoneyMovementOutcomeEvent event =
+                            objectMapper.convertValue(
+                                    envelope.payload(), MoneyMovementOutcomeEvent.class);
+                    if (event.customerId() == null) {
+                        log.warn(
+                                "No customerId on {} for transaction {}; skipping notification",
+                                envelope.eventType(),
+                                event.transactionId());
+                        return;
+                    }
+                    String text =
+                            String.format(
+                                    "%s of %s %s — %s",
+                                    template, event.amount(), event.currency(), event.status());
+                    sendNotificationUseCase.send(
+                            UUID.fromString(event.customerId()), Channel.EMAIL, template, text);
+                });
     }
 
     private void handleTransfer(String message, String template) {
-        withIdempotency(message, envelope -> {
-            TransferOutcomeEvent event = objectMapper.convertValue(envelope.payload(), TransferOutcomeEvent.class);
-            String text = String.format("%s of %s %s", template, event.amount(), event.currency());
-            if (event.sourceCustomerId() != null) {
-                sendNotificationUseCase.send(UUID.fromString(event.sourceCustomerId()), Channel.EMAIL, template,
-                        text);
-            }
-            if (event.targetCustomerId() != null) {
-                sendNotificationUseCase.send(UUID.fromString(event.targetCustomerId()), Channel.EMAIL, template,
-                        text);
-            }
-        });
+        withIdempotency(
+                message,
+                envelope -> {
+                    TransferOutcomeEvent event =
+                            objectMapper.convertValue(
+                                    envelope.payload(), TransferOutcomeEvent.class);
+                    String text =
+                            String.format(
+                                    "%s of %s %s", template, event.amount(), event.currency());
+                    if (event.sourceCustomerId() != null) {
+                        sendNotificationUseCase.send(
+                                UUID.fromString(event.sourceCustomerId()),
+                                Channel.EMAIL,
+                                template,
+                                text);
+                    }
+                    if (event.targetCustomerId() != null) {
+                        sendNotificationUseCase.send(
+                                UUID.fromString(event.targetCustomerId()),
+                                Channel.EMAIL,
+                                template,
+                                text);
+                    }
+                });
     }
 
-    private void withIdempotency(String message, java.util.function.Consumer<EventEnvelope> handler) {
+    private void withIdempotency(
+            String message, java.util.function.Consumer<EventEnvelope> handler) {
         EventEnvelope envelope = objectMapper.readValue(message, EventEnvelope.class);
-        EventProcessingContext.withCorrelation(envelope, () -> idempotentEventProcessor.process(envelope.eventId(),
-                envelope.eventType(), () -> handler.accept(envelope)));
+        EventProcessingContext.withCorrelation(
+                envelope,
+                () ->
+                        idempotentEventProcessor.process(
+                                envelope.eventId(),
+                                envelope.eventType(),
+                                () -> handler.accept(envelope)));
     }
 }

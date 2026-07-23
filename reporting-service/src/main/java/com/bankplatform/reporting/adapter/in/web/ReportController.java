@@ -26,7 +26,8 @@ public class ReportController {
     private final GenerateStatementUseCase generateStatementUseCase;
     private final GetStatementJobUseCase getStatementJobUseCase;
 
-    public ReportController(GenerateStatementUseCase generateStatementUseCase,
+    public ReportController(
+            GenerateStatementUseCase generateStatementUseCase,
             GetStatementJobUseCase getStatementJobUseCase) {
         this.generateStatementUseCase = generateStatementUseCase;
         this.getStatementJobUseCase = getStatementJobUseCase;
@@ -34,17 +35,26 @@ public class ReportController {
 
     @PostMapping("/statements")
     public ResponseEntity<StatementJobResponse> generateStatement(
-            @Valid @RequestBody GenerateStatementRequest request, @AuthenticationPrincipal Jwt jwt) {
+            @Valid @RequestBody GenerateStatementRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
         UUID customerId = UUID.fromString(jwt.getSubject());
-        var job = generateStatementUseCase.execute(customerId, request.accountId(), request.periodStart(),
-                request.periodEnd());
+        var job =
+                generateStatementUseCase.execute(
+                        customerId,
+                        request.accountId(),
+                        request.periodStart(),
+                        request.periodEnd());
         return ResponseEntity.status(HttpStatus.CREATED).body(StatementJobResponse.from(job));
     }
 
     @GetMapping("/statements/{statementId}")
-    public StatementJobResponse getStatement(@PathVariable UUID statementId, @AuthenticationPrincipal Jwt jwt) {
-        var job = getStatementJobUseCase.getById(StatementId.of(statementId), UUID.fromString(jwt.getSubject()),
-                isAdmin(jwt));
+    public StatementJobResponse getStatement(
+            @PathVariable UUID statementId, @AuthenticationPrincipal Jwt jwt) {
+        var job =
+                getStatementJobUseCase.getById(
+                        StatementId.of(statementId),
+                        UUID.fromString(jwt.getSubject()),
+                        isAdmin(jwt));
         return StatementJobResponse.from(job);
     }
 

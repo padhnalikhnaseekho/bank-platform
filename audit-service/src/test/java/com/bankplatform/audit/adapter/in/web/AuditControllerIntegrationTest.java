@@ -21,22 +21,35 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 class AuditControllerIntegrationTest extends PostgresTestcontainerBase {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @Autowired
-    private RecordAuditEventUseCase recordAuditEventUseCase;
+    @Autowired private RecordAuditEventUseCase recordAuditEventUseCase;
 
     @Test
     void adminCanSearchRecordedAuditEvents() throws Exception {
         String aggregateId = UUID.randomUUID().toString();
-        EventEnvelope envelope = new EventEnvelope(UUID.randomUUID(), "account-created", 1, Instant.now(),
-                "account-service", "corr-1", null, "Account", aggregateId, aggregateId, null);
+        EventEnvelope envelope =
+                new EventEnvelope(
+                        UUID.randomUUID(),
+                        "account-created",
+                        1,
+                        Instant.now(),
+                        "account-service",
+                        "corr-1",
+                        null,
+                        "Account",
+                        aggregateId,
+                        aggregateId,
+                        null);
         recordAuditEventUseCase.record(envelope, "{\"balance\":0}");
 
-        mockMvc.perform(get("/api/v1/audit/events").queryParam("aggregateId", aggregateId)
-                        .with(jwt().jwt(j -> j.subject(UUID.randomUUID().toString()))
-                                .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+        mockMvc.perform(
+                        get("/api/v1/audit/events")
+                                .queryParam("aggregateId", aggregateId)
+                                .with(
+                                        jwt().jwt(j -> j.subject(UUID.randomUUID().toString()))
+                                                .authorities(
+                                                        new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[0].aggregateId").value(aggregateId))
                 .andExpect(jsonPath("$.items[0].eventType").value("account-created"));
@@ -44,9 +57,13 @@ class AuditControllerIntegrationTest extends PostgresTestcontainerBase {
 
     @Test
     void nonAdminCannotSearchAuditEvents() throws Exception {
-        mockMvc.perform(get("/api/v1/audit/events")
-                        .with(jwt().jwt(j -> j.subject(UUID.randomUUID().toString()))
-                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER"))))
+        mockMvc.perform(
+                        get("/api/v1/audit/events")
+                                .with(
+                                        jwt().jwt(j -> j.subject(UUID.randomUUID().toString()))
+                                                .authorities(
+                                                        new SimpleGrantedAuthority(
+                                                                "ROLE_CUSTOMER"))))
                 .andExpect(status().isForbidden());
     }
 

@@ -21,8 +21,7 @@ import org.springframework.security.access.AccessDeniedException;
 @ExtendWith(MockitoExtension.class)
 class GetStatementJobUseCaseTest {
 
-    @Mock
-    private StatementJobRepository statementJobRepository;
+    @Mock private StatementJobRepository statementJobRepository;
 
     private GetStatementJobUseCase useCase;
 
@@ -34,8 +33,12 @@ class GetStatementJobUseCaseTest {
     @Test
     void ownerCanViewTheirOwnStatement() {
         UUID customerId = UUID.randomUUID();
-        StatementJob job = StatementJob.request(customerId, UUID.randomUUID(), Instant.now().minusSeconds(60),
-                Instant.now());
+        StatementJob job =
+                StatementJob.request(
+                        customerId,
+                        UUID.randomUUID(),
+                        Instant.now().minusSeconds(60),
+                        Instant.now());
         when(statementJobRepository.findById(job.id())).thenReturn(Optional.of(job));
 
         StatementJob result = useCase.getById(job.id(), customerId, false);
@@ -45,8 +48,12 @@ class GetStatementJobUseCaseTest {
 
     @Test
     void adminCanViewAnyStatement() {
-        StatementJob job = StatementJob.request(UUID.randomUUID(), UUID.randomUUID(), Instant.now().minusSeconds(60),
-                Instant.now());
+        StatementJob job =
+                StatementJob.request(
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        Instant.now().minusSeconds(60),
+                        Instant.now());
         when(statementJobRepository.findById(job.id())).thenReturn(Optional.of(job));
 
         StatementJob result = useCase.getById(job.id(), UUID.randomUUID(), true);
@@ -56,8 +63,12 @@ class GetStatementJobUseCaseTest {
 
     @Test
     void rejectsViewingSomeoneElsesStatement() {
-        StatementJob job = StatementJob.request(UUID.randomUUID(), UUID.randomUUID(), Instant.now().minusSeconds(60),
-                Instant.now());
+        StatementJob job =
+                StatementJob.request(
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        Instant.now().minusSeconds(60),
+                        Instant.now());
         when(statementJobRepository.findById(job.id())).thenReturn(Optional.of(job));
 
         assertThatThrownBy(() -> useCase.getById(job.id(), UUID.randomUUID(), false))

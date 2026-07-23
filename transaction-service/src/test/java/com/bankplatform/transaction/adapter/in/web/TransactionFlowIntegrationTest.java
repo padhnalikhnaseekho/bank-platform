@@ -20,37 +20,54 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 class TransactionFlowIntegrationTest extends PostgresTestcontainerBase {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
     @Test
-    void depositIsAcceptedAndReplayingTheSameIdempotencyKeyReturnsTheOriginalResult() throws Exception {
+    void depositIsAcceptedAndReplayingTheSameIdempotencyKeyReturnsTheOriginalResult()
+            throws Exception {
         UUID customerId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
-        String body = """
+        String body =
+                """
                 {"accountId":"%s","amount":50.00,"currency":"INR"}
-                """.formatted(accountId);
+                """
+                        .formatted(accountId);
 
-        String firstResponse = mockMvc
-                .perform(post("/api/v1/transactions/deposits").contentType(MediaType.APPLICATION_JSON)
-                        .header("Idempotency-Key", "dep-key-1")
-                        .content(body)
-                        .with(jwt().jwt(j -> j.subject(customerId.toString()))
-                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER"))))
-                .andExpect(status().isAccepted())
-                .andReturn().getResponse().getContentAsString();
+        String firstResponse =
+                mockMvc.perform(
+                                post("/api/v1/transactions/deposits")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .header("Idempotency-Key", "dep-key-1")
+                                        .content(body)
+                                        .with(
+                                                jwt().jwt(j -> j.subject(customerId.toString()))
+                                                        .authorities(
+                                                                new SimpleGrantedAuthority(
+                                                                        "ROLE_CUSTOMER"))))
+                        .andExpect(status().isAccepted())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
         String transactionId = JsonPath.read(firstResponse, "$.transactionId");
 
-        String replayResponse = mockMvc
-                .perform(post("/api/v1/transactions/deposits").contentType(MediaType.APPLICATION_JSON)
-                        .header("Idempotency-Key", "dep-key-1")
-                        .content(body)
-                        .with(jwt().jwt(j -> j.subject(customerId.toString()))
-                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER"))))
-                .andExpect(status().isAccepted())
-                .andReturn().getResponse().getContentAsString();
+        String replayResponse =
+                mockMvc.perform(
+                                post("/api/v1/transactions/deposits")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .header("Idempotency-Key", "dep-key-1")
+                                        .content(body)
+                                        .with(
+                                                jwt().jwt(j -> j.subject(customerId.toString()))
+                                                        .authorities(
+                                                                new SimpleGrantedAuthority(
+                                                                        "ROLE_CUSTOMER"))))
+                        .andExpect(status().isAccepted())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
 
-        org.assertj.core.api.Assertions.assertThat((String) JsonPath.read(replayResponse, "$.transactionId"))
+        org.assertj.core.api.Assertions.assertThat(
+                        (String) JsonPath.read(replayResponse, "$.transactionId"))
                 .isEqualTo(transactionId);
     }
 
@@ -59,48 +76,73 @@ class TransactionFlowIntegrationTest extends PostgresTestcontainerBase {
         UUID customerId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
 
-        mockMvc.perform(post("/api/v1/transactions/deposits").contentType(MediaType.APPLICATION_JSON)
-                        .header("Idempotency-Key", "dep-key-2")
-                        .content("""
+        mockMvc.perform(
+                        post("/api/v1/transactions/deposits")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Idempotency-Key", "dep-key-2")
+                                .content(
+                                        """
                                 {"accountId":"%s","amount":50.00,"currency":"INR"}
-                                """.formatted(accountId))
-                        .with(jwt().jwt(j -> j.subject(customerId.toString()))
-                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER"))))
+                                """
+                                                .formatted(accountId))
+                                .with(
+                                        jwt().jwt(j -> j.subject(customerId.toString()))
+                                                .authorities(
+                                                        new SimpleGrantedAuthority(
+                                                                "ROLE_CUSTOMER"))))
                 .andExpect(status().isAccepted());
 
-        mockMvc.perform(post("/api/v1/transactions/deposits").contentType(MediaType.APPLICATION_JSON)
-                        .header("Idempotency-Key", "dep-key-2")
-                        .content("""
+        mockMvc.perform(
+                        post("/api/v1/transactions/deposits")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Idempotency-Key", "dep-key-2")
+                                .content(
+                                        """
                                 {"accountId":"%s","amount":99.00,"currency":"INR"}
-                                """.formatted(accountId))
-                        .with(jwt().jwt(j -> j.subject(customerId.toString()))
-                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER"))))
+                                """
+                                                .formatted(accountId))
+                                .with(
+                                        jwt().jwt(j -> j.subject(customerId.toString()))
+                                                .authorities(
+                                                        new SimpleGrantedAuthority(
+                                                                "ROLE_CUSTOMER"))))
                 .andExpect(status().isConflict());
     }
 
     @Test
     void depositWithoutIdempotencyKeyHeaderIsBadRequest() throws Exception {
         UUID customerId = UUID.randomUUID();
-        String body = """
+        String body =
+                """
                 {"accountId":"%s","amount":50.00,"currency":"INR"}
-                """.formatted(UUID.randomUUID());
+                """
+                        .formatted(UUID.randomUUID());
 
-        mockMvc.perform(post("/api/v1/transactions/deposits").contentType(MediaType.APPLICATION_JSON)
-                        .content(body)
-                        .with(jwt().jwt(j -> j.subject(customerId.toString()))
-                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER"))))
+        mockMvc.perform(
+                        post("/api/v1/transactions/deposits")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body)
+                                .with(
+                                        jwt().jwt(j -> j.subject(customerId.toString()))
+                                                .authorities(
+                                                        new SimpleGrantedAuthority(
+                                                                "ROLE_CUSTOMER"))))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void depositWithoutTokenIsUnauthorized() throws Exception {
-        String body = """
+        String body =
+                """
                 {"accountId":"%s","amount":50.00,"currency":"INR"}
-                """.formatted(UUID.randomUUID());
+                """
+                        .formatted(UUID.randomUUID());
 
-        mockMvc.perform(post("/api/v1/transactions/deposits").contentType(MediaType.APPLICATION_JSON)
-                        .header("Idempotency-Key", "dep-key-3")
-                        .content(body))
+        mockMvc.perform(
+                        post("/api/v1/transactions/deposits")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Idempotency-Key", "dep-key-3")
+                                .content(body))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -108,15 +150,22 @@ class TransactionFlowIntegrationTest extends PostgresTestcontainerBase {
     void transferToTheSameAccountIsRejected() throws Exception {
         UUID customerId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
-        String body = """
+        String body =
+                """
                 {"sourceAccountId":"%s","targetAccountId":"%s","amount":10.00,"currency":"INR"}
-                """.formatted(accountId, accountId);
+                """
+                        .formatted(accountId, accountId);
 
-        mockMvc.perform(post("/api/v1/transactions/transfers").contentType(MediaType.APPLICATION_JSON)
-                        .header("Idempotency-Key", "xfer-key-1")
-                        .content(body)
-                        .with(jwt().jwt(j -> j.subject(customerId.toString()))
-                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER"))))
+        mockMvc.perform(
+                        post("/api/v1/transactions/transfers")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Idempotency-Key", "xfer-key-1")
+                                .content(body)
+                                .with(
+                                        jwt().jwt(j -> j.subject(customerId.toString()))
+                                                .authorities(
+                                                        new SimpleGrantedAuthority(
+                                                                "ROLE_CUSTOMER"))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -124,34 +173,61 @@ class TransactionFlowIntegrationTest extends PostgresTestcontainerBase {
     void ownerCanViewTheirTransactionButAnotherCustomerCannot() throws Exception {
         UUID customerId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
-        String body = """
+        String body =
+                """
                 {"accountId":"%s","amount":20.00,"currency":"INR"}
-                """.formatted(accountId);
+                """
+                        .formatted(accountId);
 
-        String response = mockMvc
-                .perform(post("/api/v1/transactions/deposits").contentType(MediaType.APPLICATION_JSON)
-                        .header("Idempotency-Key", "dep-key-4")
-                        .content(body)
-                        .with(jwt().jwt(j -> j.subject(customerId.toString()))
-                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER"))))
-                .andExpect(status().isAccepted())
-                .andReturn().getResponse().getContentAsString();
+        String response =
+                mockMvc.perform(
+                                post("/api/v1/transactions/deposits")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .header("Idempotency-Key", "dep-key-4")
+                                        .content(body)
+                                        .with(
+                                                jwt().jwt(j -> j.subject(customerId.toString()))
+                                                        .authorities(
+                                                                new SimpleGrantedAuthority(
+                                                                        "ROLE_CUSTOMER"))))
+                        .andExpect(status().isAccepted())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
         String transactionId = JsonPath.read(response, "$.transactionId");
 
-        mockMvc.perform(get("/api/v1/transactions/" + transactionId)
-                        .with(jwt().jwt(j -> j.subject(customerId.toString()))
-                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER"))))
+        mockMvc.perform(
+                        get("/api/v1/transactions/" + transactionId)
+                                .with(
+                                        jwt().jwt(j -> j.subject(customerId.toString()))
+                                                .authorities(
+                                                        new SimpleGrantedAuthority(
+                                                                "ROLE_CUSTOMER"))))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/api/v1/transactions/" + transactionId)
-                        .with(jwt().jwt(j -> j.subject(UUID.randomUUID().toString()))
-                                .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER"))))
+        mockMvc.perform(
+                        get("/api/v1/transactions/" + transactionId)
+                                .with(
+                                        jwt().jwt(j -> j.subject(UUID.randomUUID().toString()))
+                                                .authorities(
+                                                        new SimpleGrantedAuthority(
+                                                                "ROLE_CUSTOMER"))))
                 .andExpect(status().isForbidden());
 
-        mockMvc.perform(get("/api/v1/transactions/" + transactionId)
-                        .with(jwt().jwt(j -> j.subject(UUID.randomUUID().toString()).claim("roles",
-                                        java.util.List.of("ADMIN")))
-                                .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+        mockMvc.perform(
+                        get("/api/v1/transactions/" + transactionId)
+                                .with(
+                                        jwt().jwt(
+                                                        j ->
+                                                                j.subject(
+                                                                                UUID.randomUUID()
+                                                                                        .toString())
+                                                                        .claim(
+                                                                                "roles",
+                                                                                java.util.List.of(
+                                                                                        "ADMIN")))
+                                                .authorities(
+                                                        new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isOk());
     }
 }

@@ -19,9 +19,9 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
 /**
- * Generates an RSA key pair at startup for local development. A real deployment would load
- * the private key from Secrets Manager (see plan/AWS.md) instead of generating an ephemeral
- * one on every restart.
+ * Generates an RSA key pair at startup for local development. A real deployment would load the
+ * private key from Secrets Manager (see plan/AWS.md) instead of generating an ephemeral one on
+ * every restart.
  */
 @Configuration
 public class JwtKeyConfig {

@@ -11,8 +11,12 @@ import tools.jackson.databind.ObjectMapper;
 @Configuration
 public class FraudStreamsConfig {
 
-    public FraudStreamsConfig(StreamsBuilder streamsBuilder, ObjectMapper objectMapper, List<FraudRule> rules,
+    public FraudStreamsConfig(
+            StreamsBuilder streamsBuilder,
+            ObjectMapper objectMapper,
+            List<FraudRule> rules,
             @Value("${bank-platform.fraud.window-minutes:10}") long windowMinutes) {
-        FraudDetectionTopologyBuilder.build(streamsBuilder, objectMapper, rules, Duration.ofMinutes(windowMinutes));
+        FraudDetectionTopologyBuilder.build(
+                streamsBuilder, objectMapper, rules, Duration.ofMinutes(windowMinutes));
     }
 }

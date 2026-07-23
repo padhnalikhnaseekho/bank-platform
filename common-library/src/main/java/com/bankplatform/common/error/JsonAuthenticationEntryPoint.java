@@ -16,7 +16,10 @@ public class JsonAuthenticationEntryPoint implements AuthenticationEntryPoint {
     }
 
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
+    public void commence(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            AuthenticationException authException)
             throws IOException {
         writer.write(response, HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Authentication required");
     }

@@ -11,9 +11,9 @@ import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
 
 /**
- * Closes the loop on a payment-triggered transfer. Every transfer outcome flows through
- * here (not just payment-originated ones); attempts with no matching transactionId are
- * ordinary customer transfers and are silently ignored.
+ * Closes the loop on a payment-triggered transfer. Every transfer outcome flows through here (not
+ * just payment-originated ones); attempts with no matching transactionId are ordinary customer
+ * transfers and are silently ignored.
  */
 @Component
 public class PaymentOutcomeListener {
@@ -22,8 +22,10 @@ public class PaymentOutcomeListener {
     private final IdempotentEventProcessor idempotentEventProcessor;
     private final ObjectMapper objectMapper;
 
-    public PaymentOutcomeListener(ApplyPaymentOutcomeUseCase applyPaymentOutcomeUseCase,
-            IdempotentEventProcessor idempotentEventProcessor, ObjectMapper objectMapper) {
+    public PaymentOutcomeListener(
+            ApplyPaymentOutcomeUseCase applyPaymentOutcomeUseCase,
+            IdempotentEventProcessor idempotentEventProcessor,
+            ObjectMapper objectMapper) {
         this.applyPaymentOutcomeUseCase = applyPaymentOutcomeUseCase;
         this.idempotentEventProcessor = idempotentEventProcessor;
         this.objectMapper = objectMapper;
@@ -41,12 +43,20 @@ public class PaymentOutcomeListener {
 
     private void handleOutcome(String message, boolean success) {
         EventEnvelope envelope = objectMapper.readValue(message, EventEnvelope.class);
-        EventProcessingContext.withCorrelation(envelope,
-                () -> idempotentEventProcessor.process(envelope.eventId(), envelope.eventType(), () -> {
-                    TransferOutcomeEvent event = objectMapper.convertValue(envelope.payload(),
-                            TransferOutcomeEvent.class);
-                    applyPaymentOutcomeUseCase.execute(UUID.fromString(event.transactionId()), success,
-                            event.failureReason());
-                }));
+        EventProcessingContext.withCorrelation(
+                envelope,
+                () ->
+                        idempotentEventProcessor.process(
+                                envelope.eventId(),
+                                envelope.eventType(),
+                                () -> {
+                                    TransferOutcomeEvent event =
+                                            objectMapper.convertValue(
+                                                    envelope.payload(), TransferOutcomeEvent.class);
+                                    applyPaymentOutcomeUseCase.execute(
+                                            UUID.fromString(event.transactionId()),
+                                            success,
+                                            event.failureReason());
+                                }));
     }
 }

@@ -20,9 +20,15 @@ public class PaymentAttemptRepositoryAdapter implements PaymentAttemptRepository
 
     @Override
     public PaymentAttempt save(PaymentAttempt attempt) {
-        PaymentAttemptEntity saved = jpaRepository.save(new PaymentAttemptEntity(attempt.id().value(),
-                attempt.paymentInstructionId().value(), attempt.transactionId(), attempt.status().name(),
-                attempt.failureReason(), attempt.attemptedAt()));
+        PaymentAttemptEntity saved =
+                jpaRepository.save(
+                        new PaymentAttemptEntity(
+                                attempt.id().value(),
+                                attempt.paymentInstructionId().value(),
+                                attempt.transactionId(),
+                                attempt.status().name(),
+                                attempt.failureReason(),
+                                attempt.attemptedAt()));
         return toDomain(saved);
     }
 
@@ -32,8 +38,12 @@ public class PaymentAttemptRepositoryAdapter implements PaymentAttemptRepository
     }
 
     private PaymentAttempt toDomain(PaymentAttemptEntity entity) {
-        return new PaymentAttempt(PaymentAttemptId.of(entity.getId()), PaymentId.of(entity.getPaymentInstructionId()),
-                entity.getTransactionId(), PaymentAttemptStatus.valueOf(entity.getStatus()),
-                entity.getFailureReason(), entity.getAttemptedAt());
+        return new PaymentAttempt(
+                PaymentAttemptId.of(entity.getId()),
+                PaymentId.of(entity.getPaymentInstructionId()),
+                entity.getTransactionId(),
+                PaymentAttemptStatus.valueOf(entity.getStatus()),
+                entity.getFailureReason(),
+                entity.getAttemptedAt());
     }
 }

@@ -20,7 +20,6 @@ class EmailTest {
 
     @Test
     void rejectsBlank() {
-        assertThatThrownBy(() -> new Email(""))
-                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new Email("")).isInstanceOf(IllegalArgumentException.class);
     }
 }

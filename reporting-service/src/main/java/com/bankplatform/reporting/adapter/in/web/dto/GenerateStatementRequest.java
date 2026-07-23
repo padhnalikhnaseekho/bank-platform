@@ -5,6 +5,4 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record GenerateStatementRequest(
-        @NotNull UUID accountId,
-        @NotNull Instant periodStart,
-        @NotNull Instant periodEnd) {}
+        @NotNull UUID accountId, @NotNull Instant periodStart, @NotNull Instant periodEnd) {}

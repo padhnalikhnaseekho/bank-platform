@@ -20,10 +20,18 @@ public record PaymentInstructionResponse(
         Instant updatedAt) {
 
     public static PaymentInstructionResponse from(PaymentInstruction instruction) {
-        return new PaymentInstructionResponse(instruction.id().value(), instruction.customerId(),
-                instruction.sourceAccountId(), instruction.payeeAccountId(), instruction.amount().amount(),
-                instruction.amount().currency().getCurrencyCode(), instruction.schedule().type().name(),
-                instruction.schedule().intervalDays(), instruction.schedule().nextRunAt(),
-                instruction.status().name(), instruction.createdAt(), instruction.updatedAt());
+        return new PaymentInstructionResponse(
+                instruction.id().value(),
+                instruction.customerId(),
+                instruction.sourceAccountId(),
+                instruction.payeeAccountId(),
+                instruction.amount().amount(),
+                instruction.amount().currency().getCurrencyCode(),
+                instruction.schedule().type().name(),
+                instruction.schedule().intervalDays(),
+                instruction.schedule().nextRunAt(),
+                instruction.status().name(),
+                instruction.createdAt(),
+                instruction.updatedAt());
     }
 }

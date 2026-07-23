@@ -22,35 +22,42 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Proves the {@code @Version}-based optimistic locking documented in
- * AccountRepositoryAdapter/AccountMapper actually rejects a stale concurrent write instead
- * of silently losing it, using two genuinely overlapping transactions (synchronized on a
- * barrier so both load the row before either commits).
+ * AccountRepositoryAdapter/AccountMapper actually rejects a stale concurrent write instead of
+ * silently losing it, using two genuinely overlapping transactions (synchronized on a barrier so
+ * both load the row before either commits).
  */
 @SpringBootTest
 class AccountOptimisticLockingIntegrationTest extends PostgresTestcontainerBase {
 
-    @Autowired
-    private AccountRepository accountRepository;
+    @Autowired private AccountRepository accountRepository;
 
-    @Autowired
-    private PlatformTransactionManager transactionManager;
+    @Autowired private PlatformTransactionManager transactionManager;
 
     @Test
     void exactlyOneOfTwoConcurrentUpdatesToTheSameAccountSucceeds() throws Exception {
-        Account account = accountRepository
-                .save(Account.open(UUID.randomUUID(), "900000000001", AccountType.SAVINGS, "INR"));
+        Account account =
+                accountRepository.save(
+                        Account.open(
+                                UUID.randomUUID(), "900000000001", AccountType.SAVINGS, "INR"));
         AccountId id = account.id();
 
         CyclicBarrier bothLoaded = new CyclicBarrier(2);
         AtomicInteger successCount = new AtomicInteger();
         AtomicReference<Throwable> failure = new AtomicReference<>();
 
-        Runnable creditTenRupees = () -> new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
-            Account loaded = accountRepository.findById(id).orElseThrow();
-            awaitUninterruptibly(bothLoaded);
-            loaded.credit(Money.of(new BigDecimal("10.00"), "INR"), "concurrency-test");
-            accountRepository.save(loaded);
-        });
+        Runnable creditTenRupees =
+                () ->
+                        new TransactionTemplate(transactionManager)
+                                .executeWithoutResult(
+                                        status -> {
+                                            Account loaded =
+                                                    accountRepository.findById(id).orElseThrow();
+                                            awaitUninterruptibly(bothLoaded);
+                                            loaded.credit(
+                                                    Money.of(new BigDecimal("10.00"), "INR"),
+                                                    "concurrency-test");
+                                            accountRepository.save(loaded);
+                                        });
 
         Thread t1 = runInThread(creditTenRupees, successCount, failure);
         Thread t2 = runInThread(creditTenRupees, successCount, failure);
@@ -64,15 +71,19 @@ class AccountOptimisticLockingIntegrationTest extends PostgresTestcontainerBase 
         assertThat(finalState.balance().amount()).isEqualByComparingTo("10.00");
     }
 
-    private Thread runInThread(Runnable task, AtomicInteger successCount, AtomicReference<Throwable> failure) {
-        Thread thread = Thread.ofVirtual().unstarted(() -> {
-            try {
-                task.run();
-                successCount.incrementAndGet();
-            } catch (Throwable t) {
-                failure.set(t);
-            }
-        });
+    private Thread runInThread(
+            Runnable task, AtomicInteger successCount, AtomicReference<Throwable> failure) {
+        Thread thread =
+                Thread.ofVirtual()
+                        .unstarted(
+                                () -> {
+                                    try {
+                                        task.run();
+                                        successCount.incrementAndGet();
+                                    } catch (Throwable t) {
+                                        failure.set(t);
+                                    }
+                                });
         thread.start();
         return thread;
     }

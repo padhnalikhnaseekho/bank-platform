@@ -17,8 +17,16 @@ public class PaymentInstruction {
     private final Instant createdAt;
     private Instant updatedAt;
 
-    public PaymentInstruction(PaymentId id, UUID customerId, UUID sourceAccountId, UUID payeeAccountId, Money amount,
-            PaymentSchedule schedule, PaymentStatus status, Instant createdAt, Instant updatedAt) {
+    public PaymentInstruction(
+            PaymentId id,
+            UUID customerId,
+            UUID sourceAccountId,
+            UUID payeeAccountId,
+            Money amount,
+            PaymentSchedule schedule,
+            PaymentStatus status,
+            Instant createdAt,
+            Instant updatedAt) {
         this.id = id;
         this.customerId = customerId;
         this.sourceAccountId = sourceAccountId;
@@ -30,14 +38,26 @@ public class PaymentInstruction {
         this.updatedAt = updatedAt;
     }
 
-    public static PaymentInstruction create(UUID customerId, UUID sourceAccountId, UUID payeeAccountId, Money amount,
+    public static PaymentInstruction create(
+            UUID customerId,
+            UUID sourceAccountId,
+            UUID payeeAccountId,
+            Money amount,
             PaymentSchedule schedule) {
         if (sourceAccountId.equals(payeeAccountId)) {
             throw new ValidationException("Source account and payee account must be different");
         }
         Instant now = Instant.now();
-        return new PaymentInstruction(PaymentId.newId(), customerId, sourceAccountId, payeeAccountId, amount,
-                schedule, PaymentStatus.ACTIVE, now, now);
+        return new PaymentInstruction(
+                PaymentId.newId(),
+                customerId,
+                sourceAccountId,
+                payeeAccountId,
+                amount,
+                schedule,
+                PaymentStatus.ACTIVE,
+                now,
+                now);
     }
 
     public boolean isDue(Instant now) {
@@ -57,7 +77,8 @@ public class PaymentInstruction {
 
     public void cancel() {
         if (status != PaymentStatus.ACTIVE) {
-            throw new ConflictException("Payment " + id + " must be ACTIVE to cancel but is " + status);
+            throw new ConflictException(
+                    "Payment " + id + " must be ACTIVE to cancel but is " + status);
         }
         status = PaymentStatus.CANCELLED;
         updatedAt = Instant.now();

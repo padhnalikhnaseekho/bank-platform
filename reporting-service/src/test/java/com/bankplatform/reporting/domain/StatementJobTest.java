@@ -15,14 +15,21 @@ class StatementJobTest {
     void rejectsAPeriodStartThatIsNotBeforePeriodEnd() {
         Instant instant = Instant.now();
 
-        assertThatThrownBy(() -> StatementJob.request(UUID.randomUUID(), UUID.randomUUID(), instant, instant))
+        assertThatThrownBy(
+                        () ->
+                                StatementJob.request(
+                                        UUID.randomUUID(), UUID.randomUUID(), instant, instant))
                 .isInstanceOf(ValidationException.class);
     }
 
     @Test
     void requestedJobStartsPending() {
-        StatementJob job = StatementJob.request(UUID.randomUUID(), UUID.randomUUID(),
-                Instant.now().minusSeconds(3600), Instant.now());
+        StatementJob job =
+                StatementJob.request(
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        Instant.now().minusSeconds(3600),
+                        Instant.now());
 
         assertThat(job.status()).isEqualTo(StatementStatus.PENDING);
         assertThat(job.csvFileUrl()).isNull();
@@ -31,8 +38,12 @@ class StatementJobTest {
 
     @Test
     void completeStoresBothFileUrlsAndMarksCompleted() {
-        StatementJob job = StatementJob.request(UUID.randomUUID(), UUID.randomUUID(),
-                Instant.now().minusSeconds(3600), Instant.now());
+        StatementJob job =
+                StatementJob.request(
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        Instant.now().minusSeconds(3600),
+                        Instant.now());
 
         job.complete("s3://bucket/statement.csv", "s3://bucket/statement.pdf");
 
@@ -43,8 +54,12 @@ class StatementJobTest {
 
     @Test
     void failMarksTheJobFailed() {
-        StatementJob job = StatementJob.request(UUID.randomUUID(), UUID.randomUUID(),
-                Instant.now().minusSeconds(3600), Instant.now());
+        StatementJob job =
+                StatementJob.request(
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        Instant.now().minusSeconds(3600),
+                        Instant.now());
 
         job.fail();
 
@@ -53,10 +68,15 @@ class StatementJobTest {
 
     @Test
     void rejectsCompletingAJobThatIsNotPending() {
-        StatementJob job = StatementJob.request(UUID.randomUUID(), UUID.randomUUID(),
-                Instant.now().minusSeconds(3600), Instant.now());
+        StatementJob job =
+                StatementJob.request(
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        Instant.now().minusSeconds(3600),
+                        Instant.now());
         job.fail();
 
-        assertThatThrownBy(() -> job.complete("csv-url", "pdf-url")).isInstanceOf(ConflictException.class);
+        assertThatThrownBy(() -> job.complete("csv-url", "pdf-url"))
+                .isInstanceOf(ConflictException.class);
     }
 }

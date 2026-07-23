@@ -23,11 +23,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class PaymentSchedulerJobTest {
 
-    @Mock
-    private PaymentInstructionRepository paymentInstructionRepository;
+    @Mock private PaymentInstructionRepository paymentInstructionRepository;
 
-    @Mock
-    private TriggerPaymentUseCase triggerPaymentUseCase;
+    @Mock private TriggerPaymentUseCase triggerPaymentUseCase;
 
     private PaymentSchedulerJob job;
 
@@ -37,15 +35,20 @@ class PaymentSchedulerJobTest {
     }
 
     private PaymentInstruction dueInstruction() {
-        return PaymentInstruction.create(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
-                Money.of(new BigDecimal("100"), "INR"), PaymentSchedule.oneTime(Instant.now().minusSeconds(60)));
+        return PaymentInstruction.create(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                Money.of(new BigDecimal("100"), "INR"),
+                PaymentSchedule.oneTime(Instant.now().minusSeconds(60)));
     }
 
     @Test
     void triggersEachDuePaymentThroughTheUseCase() {
         PaymentInstruction first = dueInstruction();
         PaymentInstruction second = dueInstruction();
-        when(paymentInstructionRepository.findDue(any(Instant.class), anyInt())).thenReturn(List.of(first, second));
+        when(paymentInstructionRepository.findDue(any(Instant.class), anyInt()))
+                .thenReturn(List.of(first, second));
 
         job.processDuePayments();
 
@@ -55,7 +58,8 @@ class PaymentSchedulerJobTest {
 
     @Test
     void doesNothingWhenNoPaymentsAreDue() {
-        when(paymentInstructionRepository.findDue(any(Instant.class), anyInt())).thenReturn(List.of());
+        when(paymentInstructionRepository.findDue(any(Instant.class), anyInt()))
+                .thenReturn(List.of());
 
         job.processDuePayments();
 

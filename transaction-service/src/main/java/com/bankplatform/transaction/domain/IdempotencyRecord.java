@@ -13,10 +13,16 @@ public record IdempotencyRecord(
         Instant createdAt,
         Instant expiresAt) {
 
-    public static IdempotencyRecord create(String idempotencyKey, String requestHash, String responseBody,
-            int statusCode) {
+    public static IdempotencyRecord create(
+            String idempotencyKey, String requestHash, String responseBody, int statusCode) {
         Instant now = Instant.now();
-        return new IdempotencyRecord(UUID.randomUUID(), idempotencyKey, requestHash, responseBody, statusCode, now,
+        return new IdempotencyRecord(
+                UUID.randomUUID(),
+                idempotencyKey,
+                requestHash,
+                responseBody,
+                statusCode,
+                now,
                 now.plus(Duration.ofDays(1)));
     }
 }

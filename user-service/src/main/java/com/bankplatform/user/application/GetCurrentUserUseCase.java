@@ -18,6 +18,8 @@ public class GetCurrentUserUseCase {
 
     @Transactional(readOnly = true)
     public User getById(UserId userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
+        return userRepository
+                .findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
     }
 }

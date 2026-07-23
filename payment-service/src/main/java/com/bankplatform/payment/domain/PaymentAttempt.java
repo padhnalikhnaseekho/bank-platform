@@ -13,8 +13,13 @@ public class PaymentAttempt {
     private String failureReason;
     private final Instant attemptedAt;
 
-    public PaymentAttempt(PaymentAttemptId id, PaymentId paymentInstructionId, UUID transactionId,
-            PaymentAttemptStatus status, String failureReason, Instant attemptedAt) {
+    public PaymentAttempt(
+            PaymentAttemptId id,
+            PaymentId paymentInstructionId,
+            UUID transactionId,
+            PaymentAttemptStatus status,
+            String failureReason,
+            Instant attemptedAt) {
         this.id = id;
         this.paymentInstructionId = paymentInstructionId;
         this.transactionId = transactionId;
@@ -24,8 +29,13 @@ public class PaymentAttempt {
     }
 
     public static PaymentAttempt create(PaymentId paymentInstructionId, UUID transactionId) {
-        return new PaymentAttempt(PaymentAttemptId.newId(), paymentInstructionId, transactionId,
-                PaymentAttemptStatus.PENDING, null, Instant.now());
+        return new PaymentAttempt(
+                PaymentAttemptId.newId(),
+                paymentInstructionId,
+                transactionId,
+                PaymentAttemptStatus.PENDING,
+                null,
+                Instant.now());
     }
 
     public void markSucceeded() {
@@ -41,7 +51,8 @@ public class PaymentAttempt {
 
     private void requirePending() {
         if (status != PaymentAttemptStatus.PENDING) {
-            throw new ConflictException("Payment attempt " + id + " must be PENDING but is " + status);
+            throw new ConflictException(
+                    "Payment attempt " + id + " must be PENDING but is " + status);
         }
     }
 

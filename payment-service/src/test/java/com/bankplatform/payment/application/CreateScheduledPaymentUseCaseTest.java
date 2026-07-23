@@ -25,11 +25,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class CreateScheduledPaymentUseCaseTest {
 
-    @Mock
-    private PaymentInstructionRepository paymentInstructionRepository;
+    @Mock private PaymentInstructionRepository paymentInstructionRepository;
 
-    @Mock
-    private EventPublisher eventPublisher;
+    @Mock private EventPublisher eventPublisher;
 
     private CreateScheduledPaymentUseCase useCase;
 
@@ -48,12 +46,17 @@ class CreateScheduledPaymentUseCaseTest {
         Instant runAt = Instant.now().plusSeconds(3600);
         Money amount = Money.of(new BigDecimal("250.00"), "INR");
 
-        PaymentInstruction result = useCase.execute(customerId, sourceAccountId, payeeAccountId, amount, runAt);
+        PaymentInstruction result =
+                useCase.execute(customerId, sourceAccountId, payeeAccountId, amount, runAt);
 
         assertThat(result.status()).isEqualTo(PaymentStatus.ACTIVE);
         assertThat(result.schedule().type()).isEqualTo(ScheduleType.ONE_TIME);
         assertThat(result.schedule().nextRunAt()).isEqualTo(runAt);
-        verify(eventPublisher).publish(eq("payment-created"), eq("PaymentInstruction"),
-                eq(result.id().toString()), eq(PaymentCreatedPayload.from(result)));
+        verify(eventPublisher)
+                .publish(
+                        eq("payment-created"),
+                        eq("PaymentInstruction"),
+                        eq(result.id().toString()),
+                        eq(PaymentCreatedPayload.from(result)));
     }
 }

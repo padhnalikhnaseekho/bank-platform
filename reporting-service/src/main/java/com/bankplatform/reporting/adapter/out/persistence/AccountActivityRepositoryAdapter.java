@@ -17,15 +17,33 @@ public class AccountActivityRepositoryAdapter implements AccountActivityReposito
 
     @Override
     public void save(AccountActivityEntry entry) {
-        jpaRepository.save(new AccountActivityEntity(entry.id(), entry.customerId(), entry.accountId(),
-                entry.eventType(), entry.amount(), entry.currency(), entry.occurredAt()));
+        jpaRepository.save(
+                new AccountActivityEntity(
+                        entry.id(),
+                        entry.customerId(),
+                        entry.accountId(),
+                        entry.eventType(),
+                        entry.amount(),
+                        entry.currency(),
+                        entry.occurredAt()));
     }
 
     @Override
-    public java.util.List<AccountActivityEntry> findByAccountAndPeriod(UUID accountId, Instant from, Instant to) {
-        return jpaRepository.findByAccountIdAndOccurredAtBetweenOrderByOccurredAtAsc(accountId, from, to).stream()
-                .map(e -> new AccountActivityEntry(e.getId(), e.getCustomerId(), e.getAccountId(), e.getEventType(),
-                        e.getAmount(), e.getCurrency(), e.getOccurredAt()))
+    public java.util.List<AccountActivityEntry> findByAccountAndPeriod(
+            UUID accountId, Instant from, Instant to) {
+        return jpaRepository
+                .findByAccountIdAndOccurredAtBetweenOrderByOccurredAtAsc(accountId, from, to)
+                .stream()
+                .map(
+                        e ->
+                                new AccountActivityEntry(
+                                        e.getId(),
+                                        e.getCustomerId(),
+                                        e.getAccountId(),
+                                        e.getEventType(),
+                                        e.getAmount(),
+                                        e.getCurrency(),
+                                        e.getOccurredAt()))
                 .toList();
     }
 }

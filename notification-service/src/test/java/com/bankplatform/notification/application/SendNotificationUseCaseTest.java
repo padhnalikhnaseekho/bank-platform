@@ -24,17 +24,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class SendNotificationUseCaseTest {
 
-    @Mock
-    private NotificationRepository notificationRepository;
+    @Mock private NotificationRepository notificationRepository;
 
-    @Mock
-    private EventPublisher eventPublisher;
+    @Mock private EventPublisher eventPublisher;
 
-    @Mock
-    private ChannelAdapter emailAdapter;
+    @Mock private ChannelAdapter emailAdapter;
 
-    @Mock
-    private ChannelAdapter smsAdapter;
+    @Mock private ChannelAdapter smsAdapter;
 
     private SendNotificationUseCase useCase;
 
@@ -42,14 +38,16 @@ class SendNotificationUseCaseTest {
     void setUp() {
         when(emailAdapter.channel()).thenReturn(Channel.EMAIL);
         when(smsAdapter.channel()).thenReturn(Channel.SMS);
-        useCase = new SendNotificationUseCase(notificationRepository, eventPublisher,
-                List.of(emailAdapter, smsAdapter));
+        useCase =
+                new SendNotificationUseCase(
+                        notificationRepository, eventPublisher, List.of(emailAdapter, smsAdapter));
     }
 
     @Test
     void routesToTheAdapterForTheRequestedChannelAndPublishesNotificationSentOnSuccess() {
         when(emailAdapter.send(any(), any())).thenReturn(ChannelAdapter.DeliveryResult.delivered());
-        when(notificationRepository.save(any(Notification.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(notificationRepository.save(any(Notification.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
         UUID recipientId = UUID.randomUUID();
 
         useCase.send(recipientId, Channel.EMAIL, "welcome", "hello");
@@ -65,8 +63,10 @@ class SendNotificationUseCaseTest {
 
     @Test
     void publishesNotificationFailedWhenTheAdapterFailsToDeliver() {
-        when(smsAdapter.send(any(), any())).thenReturn(new ChannelAdapter.DeliveryResult(false, "provider down"));
-        when(notificationRepository.save(any(Notification.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(smsAdapter.send(any(), any()))
+                .thenReturn(new ChannelAdapter.DeliveryResult(false, "provider down"));
+        when(notificationRepository.save(any(Notification.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
 
         useCase.send(UUID.randomUUID(), Channel.SMS, "otp", "123456");
 

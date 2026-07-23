@@ -30,20 +30,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class LoginUseCaseTest {
 
-    @Mock
-    private UserRepository userRepository;
+    @Mock private UserRepository userRepository;
 
-    @Mock
-    private PasswordHasher passwordHasher;
+    @Mock private PasswordHasher passwordHasher;
 
-    @Mock
-    private TokenIssuer tokenIssuer;
+    @Mock private TokenIssuer tokenIssuer;
 
-    @Mock
-    private RefreshTokenRepository refreshTokenRepository;
+    @Mock private RefreshTokenRepository refreshTokenRepository;
 
-    @Mock
-    private EventPublisher eventPublisher;
+    @Mock private EventPublisher eventPublisher;
 
     private LoginUseCase useCase;
 
@@ -51,12 +46,27 @@ class LoginUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        useCase = new LoginUseCase(userRepository, passwordHasher, tokenIssuer, refreshTokenRepository,
-                new OpaqueTokenGenerator(), eventPublisher);
+        useCase =
+                new LoginUseCase(
+                        userRepository,
+                        passwordHasher,
+                        tokenIssuer,
+                        refreshTokenRepository,
+                        new OpaqueTokenGenerator(),
+                        eventPublisher);
         UserId id = UserId.newId();
         Credential credential = new Credential(id, "hashed", Instant.now(), 0);
-        activeUser = new User(id, new Email("alice@example.com"), null, "Alice", User.Status.ACTIVE,
-                Set.of(Role.CUSTOMER), credential, Instant.now(), Instant.now());
+        activeUser =
+                new User(
+                        id,
+                        new Email("alice@example.com"),
+                        null,
+                        "Alice",
+                        User.Status.ACTIVE,
+                        Set.of(Role.CUSTOMER),
+                        credential,
+                        Instant.now(),
+                        Instant.now());
     }
 
     @Test
@@ -64,7 +74,8 @@ class LoginUseCaseTest {
         when(userRepository.findByEmail(any(Email.class))).thenReturn(Optional.of(activeUser));
         when(passwordHasher.matches(anyString(), anyString())).thenReturn(true);
         when(tokenIssuer.issueAccessToken(activeUser)).thenReturn("jwt-token");
-        when(refreshTokenRepository.save(any(RefreshToken.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(refreshTokenRepository.save(any(RefreshToken.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
 
         LoginUseCase.Result result = useCase.login("alice@example.com", "password123");
 

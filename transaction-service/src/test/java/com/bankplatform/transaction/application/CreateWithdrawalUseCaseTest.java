@@ -22,11 +22,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class CreateWithdrawalUseCaseTest {
 
-    @Mock
-    private TransactionRepository transactionRepository;
+    @Mock private TransactionRepository transactionRepository;
 
-    @Mock
-    private EventPublisher eventPublisher;
+    @Mock private EventPublisher eventPublisher;
 
     private CreateWithdrawalUseCase useCase;
 
@@ -37,7 +35,8 @@ class CreateWithdrawalUseCaseTest {
 
     @Test
     void createsAndPersistsAProcessingWithdrawal() {
-        when(transactionRepository.save(any(Transaction.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(transactionRepository.save(any(Transaction.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
         UUID customerId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
         Money amount = Money.of(new BigDecimal("25.00"), "INR");
@@ -47,8 +46,17 @@ class CreateWithdrawalUseCaseTest {
         assertThat(result.status()).isEqualTo(TransactionStatus.PROCESSING);
         assertThat(result.sourceAccountId()).isEqualTo(accountId);
         assertThat(result.targetAccountId()).isNull();
-        verify(eventPublisher).publish("transaction-created", "Transaction", result.id().toString(),
-                new TransactionEventPayload(result.id().toString(), "WITHDRAWAL", accountId.toString(), null,
-                        amount.amount(), "INR"));
+        verify(eventPublisher)
+                .publish(
+                        "transaction-created",
+                        "Transaction",
+                        result.id().toString(),
+                        new TransactionEventPayload(
+                                result.id().toString(),
+                                "WITHDRAWAL",
+                                accountId.toString(),
+                                null,
+                                amount.amount(),
+                                "INR"));
     }
 }

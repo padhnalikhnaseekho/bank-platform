@@ -14,8 +14,7 @@ import java.util.UUID;
 @Table(name = "credentials")
 public class CredentialEntity {
 
-    @Id
-    private UUID id;
+    @Id private UUID id;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
@@ -32,7 +31,11 @@ public class CredentialEntity {
 
     protected CredentialEntity() {}
 
-    public CredentialEntity(UUID id, UserEntity user, String passwordHash, Instant passwordChangedAt,
+    public CredentialEntity(
+            UUID id,
+            UserEntity user,
+            String passwordHash,
+            Instant passwordChangedAt,
             int failedAttempts) {
         this.id = id;
         this.user = user;

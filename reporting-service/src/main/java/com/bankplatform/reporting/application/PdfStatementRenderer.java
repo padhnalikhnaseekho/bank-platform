@@ -25,7 +25,9 @@ public class PdfStatementRenderer {
         try (PDDocument document = new PDDocument()) {
             List<String> lines = buildLines(job, entries);
             for (int start = 0; start < Math.max(lines.size(), 1); start += LINES_PER_PAGE) {
-                renderPage(document, lines.subList(start, Math.min(start + LINES_PER_PAGE, lines.size())));
+                renderPage(
+                        document,
+                        lines.subList(start, Math.min(start + LINES_PER_PAGE, lines.size())));
             }
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             document.save(out);
@@ -43,8 +45,13 @@ public class PdfStatementRenderer {
         lines.add("");
         lines.add(String.format("%-20s %15s %6s %-30s", "Type", "Amount", "Curr", "Occurred At"));
         for (AccountActivityEntry entry : entries) {
-            lines.add(String.format("%-20s %15s %6s %-30s", entry.eventType(), entry.amount(), entry.currency(),
-                    entry.occurredAt()));
+            lines.add(
+                    String.format(
+                            "%-20s %15s %6s %-30s",
+                            entry.eventType(),
+                            entry.amount(),
+                            entry.currency(),
+                            entry.occurredAt()));
         }
         if (entries.isEmpty()) {
             lines.add("(no activity in this period)");

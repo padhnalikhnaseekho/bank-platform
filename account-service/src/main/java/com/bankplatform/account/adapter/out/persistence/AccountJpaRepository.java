@@ -9,7 +9,8 @@ public interface AccountJpaRepository extends JpaRepository<AccountEntity, UUID>
 
     boolean existsByAccountNumber(String accountNumber);
 
-    Page<AccountEntity> findByCustomerIdAndStatus(UUID customerId, String status, Pageable pageable);
+    Page<AccountEntity> findByCustomerIdAndStatus(
+            UUID customerId, String status, Pageable pageable);
 
     Page<AccountEntity> findByCustomerId(UUID customerId, Pageable pageable);
 }

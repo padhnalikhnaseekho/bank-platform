@@ -19,8 +19,12 @@ class PdfStatementRendererTest {
 
     @Test
     void rendersAValidPdfDocumentWithNoEntries() {
-        StatementJob job = StatementJob.request(UUID.randomUUID(), UUID.randomUUID(), Instant.now().minusSeconds(60),
-                Instant.now());
+        StatementJob job =
+                StatementJob.request(
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        Instant.now().minusSeconds(60),
+                        Instant.now());
 
         byte[] pdf = renderer.render(job, List.of());
 
@@ -30,10 +34,20 @@ class PdfStatementRendererTest {
 
     @Test
     void rendersAValidPdfDocumentWithEntries() {
-        StatementJob job = StatementJob.request(UUID.randomUUID(), UUID.randomUUID(), Instant.now().minusSeconds(60),
-                Instant.now());
-        AccountActivityEntry entry = AccountActivityEntry.create(job.customerId(), job.accountId(), "DEPOSIT",
-                new BigDecimal("100.00"), "INR", Instant.now());
+        StatementJob job =
+                StatementJob.request(
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        Instant.now().minusSeconds(60),
+                        Instant.now());
+        AccountActivityEntry entry =
+                AccountActivityEntry.create(
+                        job.customerId(),
+                        job.accountId(),
+                        "DEPOSIT",
+                        new BigDecimal("100.00"),
+                        "INR",
+                        Instant.now());
 
         byte[] pdf = renderer.render(job, List.of(entry));
 
@@ -42,12 +56,24 @@ class PdfStatementRendererTest {
 
     @Test
     void spansMultiplePagesWhenThereAreManyEntries() {
-        StatementJob job = StatementJob.request(UUID.randomUUID(), UUID.randomUUID(), Instant.now().minusSeconds(60),
-                Instant.now());
-        List<AccountActivityEntry> entries = java.util.stream.IntStream.range(0, 100)
-                .mapToObj(i -> AccountActivityEntry.create(job.customerId(), job.accountId(), "DEPOSIT",
-                        new BigDecimal("1.00"), "INR", Instant.now()))
-                .toList();
+        StatementJob job =
+                StatementJob.request(
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        Instant.now().minusSeconds(60),
+                        Instant.now());
+        List<AccountActivityEntry> entries =
+                java.util.stream.IntStream.range(0, 100)
+                        .mapToObj(
+                                i ->
+                                        AccountActivityEntry.create(
+                                                job.customerId(),
+                                                job.accountId(),
+                                                "DEPOSIT",
+                                                new BigDecimal("1.00"),
+                                                "INR",
+                                                Instant.now()))
+                        .toList();
 
         byte[] pdf = renderer.render(job, entries);
 

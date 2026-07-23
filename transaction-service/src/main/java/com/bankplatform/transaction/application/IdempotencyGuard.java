@@ -15,10 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
 /**
- * Wraps a create-transaction use case with Idempotency-Key semantics: a replayed key with
- * the same request returns the original response verbatim; the same key with a different
- * request is a conflict. The DB unique index on idempotency_key is the ultimate race
- * guard for genuinely concurrent duplicate requests, not just this up-front check.
+ * Wraps a create-transaction use case with Idempotency-Key semantics: a replayed key with the same
+ * request returns the original response verbatim; the same key with a different request is a
+ * conflict. The DB unique index on idempotency_key is the ultimate race guard for genuinely
+ * concurrent duplicate requests, not just this up-front check.
  */
 @Component
 public class IdempotencyGuard {
@@ -26,13 +26,15 @@ public class IdempotencyGuard {
     private final IdempotencyRepository idempotencyRepository;
     private final ObjectMapper objectMapper;
 
-    public IdempotencyGuard(IdempotencyRepository idempotencyRepository, ObjectMapper objectMapper) {
+    public IdempotencyGuard(
+            IdempotencyRepository idempotencyRepository, ObjectMapper objectMapper) {
         this.idempotencyRepository = idempotencyRepository;
         this.objectMapper = objectMapper;
     }
 
     @Transactional
-    public TransactionResult execute(String idempotencyKey, Object requestBody, Supplier<TransactionResult> action) {
+    public TransactionResult execute(
+            String idempotencyKey, Object requestBody, Supplier<TransactionResult> action) {
         String requestHash = hash(requestBody);
         Optional<IdempotencyRecord> existing = idempotencyRepository.findByKey(idempotencyKey);
         if (existing.isPresent()) {
@@ -41,9 +43,12 @@ public class IdempotencyGuard {
         TransactionResult result = action.get();
         String responseJson = objectMapper.writeValueAsString(result);
         try {
-            idempotencyRepository.save(IdempotencyRecord.create(idempotencyKey, requestHash, responseJson, 202));
+            idempotencyRepository.save(
+                    IdempotencyRecord.create(idempotencyKey, requestHash, responseJson, 202));
         } catch (DataIntegrityViolationException e) {
-            return replay(idempotencyRepository.findByKey(idempotencyKey).orElseThrow(() -> e), requestHash);
+            return replay(
+                    idempotencyRepository.findByKey(idempotencyKey).orElseThrow(() -> e),
+                    requestHash);
         }
         return result;
     }

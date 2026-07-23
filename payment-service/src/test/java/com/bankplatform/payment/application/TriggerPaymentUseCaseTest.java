@@ -28,31 +28,39 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class TriggerPaymentUseCaseTest {
 
-    @Mock
-    private PaymentInstructionRepository paymentInstructionRepository;
+    @Mock private PaymentInstructionRepository paymentInstructionRepository;
 
-    @Mock
-    private PaymentAttemptRepository paymentAttemptRepository;
+    @Mock private PaymentAttemptRepository paymentAttemptRepository;
 
-    @Mock
-    private EventPublisher eventPublisher;
+    @Mock private EventPublisher eventPublisher;
 
     private TriggerPaymentUseCase useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new TriggerPaymentUseCase(paymentInstructionRepository, paymentAttemptRepository, eventPublisher);
-        when(paymentAttemptRepository.save(any(PaymentAttempt.class))).thenAnswer(inv -> inv.getArgument(0));
-        when(paymentInstructionRepository.save(any(PaymentInstruction.class))).thenAnswer(inv -> inv.getArgument(0));
+        useCase =
+                new TriggerPaymentUseCase(
+                        paymentInstructionRepository, paymentAttemptRepository, eventPublisher);
+        when(paymentAttemptRepository.save(any(PaymentAttempt.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
+        when(paymentInstructionRepository.save(any(PaymentInstruction.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
     }
 
     private PaymentInstruction oneTimeInstruction() {
-        return PaymentInstruction.create(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
-                Money.of(new BigDecimal("100"), "INR"), PaymentSchedule.oneTime(Instant.now().minusSeconds(60)));
+        return PaymentInstruction.create(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                Money.of(new BigDecimal("100"), "INR"),
+                PaymentSchedule.oneTime(Instant.now().minusSeconds(60)));
     }
 
     private PaymentInstruction recurringInstruction() {
-        return PaymentInstruction.create(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
+        return PaymentInstruction.create(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                UUID.randomUUID(),
                 Money.of(new BigDecimal("100"), "INR"),
                 PaymentSchedule.recurring(Instant.now().minusSeconds(60), 30));
     }
@@ -64,8 +72,12 @@ class TriggerPaymentUseCaseTest {
         useCase.execute(instruction);
 
         verify(paymentAttemptRepository).save(any(PaymentAttempt.class));
-        verify(eventPublisher).publish(eq("payment-due"), eq("PaymentInstruction"), eq(instruction.id().toString()),
-                any());
+        verify(eventPublisher)
+                .publish(
+                        eq("payment-due"),
+                        eq("PaymentInstruction"),
+                        eq(instruction.id().toString()),
+                        any());
         verify(eventPublisher).publish(eq("transfer-started"), eq("Transaction"), any(), any());
     }
 
@@ -92,14 +104,15 @@ class TriggerPaymentUseCaseTest {
     @Test
     void theTransactionIdUsedForTheAttemptMatchesTheOneInTheTransferStartedEvent() {
         PaymentInstruction instruction = oneTimeInstruction();
-        ArgumentCaptor<PaymentAttempt> attemptCaptor = ArgumentCaptor.forClass(PaymentAttempt.class);
+        ArgumentCaptor<PaymentAttempt> attemptCaptor =
+                ArgumentCaptor.forClass(PaymentAttempt.class);
         ArgumentCaptor<Object> transferPayloadCaptor = ArgumentCaptor.forClass(Object.class);
 
         useCase.execute(instruction);
 
         verify(paymentAttemptRepository).save(attemptCaptor.capture());
-        verify(eventPublisher, times(1)).publish(eq("transfer-started"), any(), any(),
-                transferPayloadCaptor.capture());
+        verify(eventPublisher, times(1))
+                .publish(eq("transfer-started"), any(), any(), transferPayloadCaptor.capture());
         assertThat(transferPayloadCaptor.getValue().toString())
                 .contains(attemptCaptor.getValue().transactionId().toString());
     }

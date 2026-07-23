@@ -12,8 +12,7 @@ import java.util.UUID;
 @Table(name = "ledger_entries")
 public class LedgerEntryEntity {
 
-    @Id
-    private UUID id;
+    @Id private UUID id;
 
     @Column(name = "account_id", nullable = false)
     private UUID accountId;
@@ -35,8 +34,14 @@ public class LedgerEntryEntity {
 
     protected LedgerEntryEntity() {}
 
-    public LedgerEntryEntity(UUID id, UUID accountId, String entryType, BigDecimal amount, String currency,
-            String referenceId, Instant createdAt) {
+    public LedgerEntryEntity(
+            UUID id,
+            UUID accountId,
+            String entryType,
+            BigDecimal amount,
+            String currency,
+            String referenceId,
+            Instant createdAt) {
         this.id = id;
         this.accountId = accountId;
         this.entryType = entryType;

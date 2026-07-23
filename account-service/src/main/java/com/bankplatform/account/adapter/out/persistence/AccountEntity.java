@@ -13,8 +13,7 @@ import java.util.UUID;
 @Table(name = "accounts")
 public class AccountEntity {
 
-    @Id
-    private UUID id;
+    @Id private UUID id;
 
     @Column(name = "customer_id", nullable = false)
     private UUID customerId;
@@ -46,8 +45,16 @@ public class AccountEntity {
 
     protected AccountEntity() {}
 
-    public AccountEntity(UUID id, UUID customerId, String accountNumber, String type, String status,
-            String currency, BigDecimal balance, Instant createdAt, Instant updatedAt) {
+    public AccountEntity(
+            UUID id,
+            UUID customerId,
+            String accountNumber,
+            String type,
+            String status,
+            String currency,
+            BigDecimal balance,
+            Instant createdAt,
+            Instant updatedAt) {
         this.id = id;
         this.customerId = customerId;
         this.accountNumber = accountNumber;

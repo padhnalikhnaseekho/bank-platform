@@ -18,13 +18,16 @@ public class RefreshTokenRepositoryAdapter implements RefreshTokenRepository {
 
     @Override
     public RefreshToken save(RefreshToken refreshToken) {
-        RefreshTokenEntity saved = refreshTokenJpaRepository.save(RefreshTokenMapper.toEntity(refreshToken));
+        RefreshTokenEntity saved =
+                refreshTokenJpaRepository.save(RefreshTokenMapper.toEntity(refreshToken));
         return RefreshTokenMapper.toDomain(saved);
     }
 
     @Override
     public Optional<RefreshToken> findByTokenHash(String tokenHash) {
-        return refreshTokenJpaRepository.findByTokenHash(tokenHash).map(RefreshTokenMapper::toDomain);
+        return refreshTokenJpaRepository
+                .findByTokenHash(tokenHash)
+                .map(RefreshTokenMapper::toDomain);
     }
 
     @Override

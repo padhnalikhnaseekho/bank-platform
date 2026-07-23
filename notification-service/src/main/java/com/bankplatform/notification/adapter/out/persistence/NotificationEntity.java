@@ -11,8 +11,7 @@ import java.util.UUID;
 @Table(name = "notifications")
 public class NotificationEntity {
 
-    @Id
-    private UUID id;
+    @Id private UUID id;
 
     @Column(name = "recipient_user_id", nullable = false)
     private UUID recipientUserId;
@@ -34,8 +33,14 @@ public class NotificationEntity {
 
     protected NotificationEntity() {}
 
-    public NotificationEntity(UUID id, UUID recipientUserId, String channel, String template, String message,
-            String status, Instant createdAt) {
+    public NotificationEntity(
+            UUID id,
+            UUID recipientUserId,
+            String channel,
+            String template,
+            String message,
+            String status,
+            Instant createdAt) {
         this.id = id;
         this.recipientUserId = recipientUserId;
         this.channel = channel;

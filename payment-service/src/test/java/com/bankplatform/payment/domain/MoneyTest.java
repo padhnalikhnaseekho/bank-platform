@@ -18,7 +18,8 @@ class MoneyTest {
 
     @Test
     void rejectsZeroAmount() {
-        assertThatThrownBy(() -> Money.of(BigDecimal.ZERO, "INR")).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> Money.of(BigDecimal.ZERO, "INR"))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -29,6 +30,7 @@ class MoneyTest {
 
     @Test
     void rejectsNullCurrency() {
-        assertThatThrownBy(() -> new Money(BigDecimal.TEN, null)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new Money(BigDecimal.TEN, null))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

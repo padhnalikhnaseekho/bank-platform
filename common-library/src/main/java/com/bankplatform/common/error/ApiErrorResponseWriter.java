@@ -10,8 +10,8 @@ import org.springframework.http.MediaType;
 import tools.jackson.databind.ObjectMapper;
 
 /**
- * Writes an {@link ApiError} body directly to the response for failures that occur inside
- * the Spring Security filter chain (authentication/authorization), which never reach
+ * Writes an {@link ApiError} body directly to the response for failures that occur inside the
+ * Spring Security filter chain (authentication/authorization), which never reach
  * {@code @RestControllerAdvice}.
  */
 public class ApiErrorResponseWriter {
@@ -22,7 +22,8 @@ public class ApiErrorResponseWriter {
         this.objectMapper = objectMapper;
     }
 
-    public void write(HttpServletResponse response, HttpStatus status, String errorCode, String message)
+    public void write(
+            HttpServletResponse response, HttpStatus status, String errorCode, String message)
             throws IOException {
         response.setStatus(status.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

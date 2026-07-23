@@ -15,13 +15,17 @@ import software.amazon.awssdk.services.s3.S3ClientBuilder;
 public class S3ClientConfig {
 
     @Bean
-    public S3Client s3Client(@Value("${bank-platform.reports.s3.region}") String region,
+    public S3Client s3Client(
+            @Value("${bank-platform.reports.s3.region}") String region,
             @Value("${bank-platform.reports.s3.endpoint-override:}") String endpointOverride) {
         S3ClientBuilder builder = S3Client.builder().region(Region.of(region));
         if (endpointOverride != null && !endpointOverride.isBlank()) {
             // LocalStack: path-style + dummy credentials, matching plan/AWS.md's local-dev mode.
-            builder.endpointOverride(URI.create(endpointOverride)).forcePathStyle(true)
-                    .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("test", "test")));
+            builder.endpointOverride(URI.create(endpointOverride))
+                    .forcePathStyle(true)
+                    .credentialsProvider(
+                            StaticCredentialsProvider.create(
+                                    AwsBasicCredentials.create("test", "test")));
         } else {
             builder.credentialsProvider(DefaultCredentialsProvider.create());
         }

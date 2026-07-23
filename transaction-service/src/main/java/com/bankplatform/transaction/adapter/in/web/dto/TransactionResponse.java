@@ -18,9 +18,16 @@ public record TransactionResponse(
         Instant updatedAt) {
 
     public static TransactionResponse from(Transaction transaction) {
-        return new TransactionResponse(transaction.id().value(), transaction.customerId(),
-                transaction.type().name(), transaction.status().name(), transaction.amount().amount(),
-                transaction.amount().currency().getCurrencyCode(), transaction.sourceAccountId(),
-                transaction.targetAccountId(), transaction.createdAt(), transaction.updatedAt());
+        return new TransactionResponse(
+                transaction.id().value(),
+                transaction.customerId(),
+                transaction.type().name(),
+                transaction.status().name(),
+                transaction.amount().amount(),
+                transaction.amount().currency().getCurrencyCode(),
+                transaction.sourceAccountId(),
+                transaction.targetAccountId(),
+                transaction.createdAt(),
+                transaction.updatedAt());
     }
 }

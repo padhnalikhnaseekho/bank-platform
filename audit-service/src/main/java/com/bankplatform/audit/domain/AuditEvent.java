@@ -15,9 +15,23 @@ public record AuditEvent(
         Instant occurredAt,
         Instant storedAt) {
 
-    public static AuditEvent capture(UUID eventId, String eventType, String aggregateType, String aggregateId,
-            String payload, String correlationId, Instant occurredAt) {
-        return new AuditEvent(UUID.randomUUID(), eventId, eventType, aggregateType, aggregateId, payload,
-                correlationId, occurredAt, Instant.now());
+    public static AuditEvent capture(
+            UUID eventId,
+            String eventType,
+            String aggregateType,
+            String aggregateId,
+            String payload,
+            String correlationId,
+            Instant occurredAt) {
+        return new AuditEvent(
+                UUID.randomUUID(),
+                eventId,
+                eventType,
+                aggregateType,
+                aggregateId,
+                payload,
+                correlationId,
+                occurredAt,
+                Instant.now());
     }
 }

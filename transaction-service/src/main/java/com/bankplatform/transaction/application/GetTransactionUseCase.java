@@ -20,8 +20,10 @@ public class GetTransactionUseCase {
 
     @Transactional(readOnly = true)
     public Transaction getById(TransactionId id, UUID requesterId, boolean isAdmin) {
-        Transaction transaction = transactionRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Transaction not found"));
+        Transaction transaction =
+                transactionRepository
+                        .findById(id)
+                        .orElseThrow(() -> new NotFoundException("Transaction not found"));
         if (!isAdmin && !transaction.customerId().equals(requesterId)) {
             throw new AccessDeniedException("Not authorized to view this transaction");
         }

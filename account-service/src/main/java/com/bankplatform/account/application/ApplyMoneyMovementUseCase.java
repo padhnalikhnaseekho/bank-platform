@@ -15,10 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Kept as its own bean (rather than inlined in MoneyMovementListener) so the transactional
- * boundary is enforced through a real Spring proxy — calling an {@code @Transactional}
- * method on {@code this} from within the same class silently skips the transaction, since
- * self-invocation never goes through the proxy, in CGLIB just as much as JDK proxies.
+ * Kept as its own bean (rather than inlined in MoneyMovementListener) so the transactional boundary
+ * is enforced through a real Spring proxy — calling an {@code @Transactional} method on {@code
+ * this} from within the same class silently skips the transaction, since self-invocation never goes
+ * through the proxy, in CGLIB just as much as JDK proxies.
  */
 @Service
 public class ApplyMoneyMovementUseCase {
@@ -26,7 +26,8 @@ public class ApplyMoneyMovementUseCase {
     private final AccountRepository accountRepository;
     private final EventPublisher eventPublisher;
 
-    public ApplyMoneyMovementUseCase(AccountRepository accountRepository, EventPublisher eventPublisher) {
+    public ApplyMoneyMovementUseCase(
+            AccountRepository accountRepository, EventPublisher eventPublisher) {
         this.accountRepository = accountRepository;
         this.eventPublisher = eventPublisher;
     }
@@ -34,7 +35,8 @@ public class ApplyMoneyMovementUseCase {
     @Transactional
     public void execute(TransactionCreatedEvent payload) {
         boolean isDeposit = "DEPOSIT".equals(payload.type());
-        UUID accountIdValue = UUID.fromString(isDeposit ? payload.targetAccountId() : payload.sourceAccountId());
+        UUID accountIdValue =
+                UUID.fromString(isDeposit ? payload.targetAccountId() : payload.sourceAccountId());
 
         String status;
         String failureReason = null;
@@ -48,8 +50,10 @@ public class ApplyMoneyMovementUseCase {
                 Account acc = account.get();
                 customerId = acc.customerId().toString();
                 Money amount = Money.of(payload.amount(), payload.currency());
-                LedgerEntry entry = isDeposit ? acc.credit(amount, payload.transactionId())
-                        : acc.debit(amount, payload.transactionId());
+                LedgerEntry entry =
+                        isDeposit
+                                ? acc.credit(amount, payload.transactionId())
+                                : acc.debit(amount, payload.transactionId());
                 accountRepository.save(acc);
                 accountRepository.saveLedgerEntry(entry);
                 status = "COMPLETED";
@@ -60,8 +64,17 @@ public class ApplyMoneyMovementUseCase {
         }
 
         String eventType = isDeposit ? "money-deposited" : "money-withdrawn";
-        eventPublisher.publish(eventType, "Account", accountIdValue.toString(),
-                new MoneyMovementOutcomePayload(payload.transactionId(), accountIdValue.toString(), customerId,
-                        payload.amount(), payload.currency(), status, failureReason));
+        eventPublisher.publish(
+                eventType,
+                "Account",
+                accountIdValue.toString(),
+                new MoneyMovementOutcomePayload(
+                        payload.transactionId(),
+                        accountIdValue.toString(),
+                        customerId,
+                        payload.amount(),
+                        payload.currency(),
+                        status,
+                        failureReason));
     }
 }

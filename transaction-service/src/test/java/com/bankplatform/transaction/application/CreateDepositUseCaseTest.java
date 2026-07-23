@@ -22,11 +22,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class CreateDepositUseCaseTest {
 
-    @Mock
-    private TransactionRepository transactionRepository;
+    @Mock private TransactionRepository transactionRepository;
 
-    @Mock
-    private EventPublisher eventPublisher;
+    @Mock private EventPublisher eventPublisher;
 
     private CreateDepositUseCase useCase;
 
@@ -37,7 +35,8 @@ class CreateDepositUseCaseTest {
 
     @Test
     void createsAndPersistsAProcessingDeposit() {
-        when(transactionRepository.save(any(Transaction.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(transactionRepository.save(any(Transaction.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
         UUID customerId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
         Money amount = Money.of(new BigDecimal("50.00"), "INR");
@@ -47,8 +46,17 @@ class CreateDepositUseCaseTest {
         assertThat(result.status()).isEqualTo(TransactionStatus.PROCESSING);
         assertThat(result.targetAccountId()).isEqualTo(accountId);
         assertThat(result.sourceAccountId()).isNull();
-        verify(eventPublisher).publish("transaction-created", "Transaction", result.id().toString(),
-                new TransactionEventPayload(result.id().toString(), "DEPOSIT", null, accountId.toString(),
-                        amount.amount(), "INR"));
+        verify(eventPublisher)
+                .publish(
+                        "transaction-created",
+                        "Transaction",
+                        result.id().toString(),
+                        new TransactionEventPayload(
+                                result.id().toString(),
+                                "DEPOSIT",
+                                null,
+                                accountId.toString(),
+                                amount.amount(),
+                                "INR"));
     }
 }

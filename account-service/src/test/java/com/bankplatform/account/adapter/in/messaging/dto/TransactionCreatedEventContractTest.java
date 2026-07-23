@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
 
 /**
- * Verifies account-service can still read the shared transfer-started contract fixture
- * published by transaction-service (see TransferStartedContractTest there). A field this class
- * declares that no longer exists (or was renamed) in the fixture deserializes to null here
- * instead of failing silently at runtime.
+ * Verifies account-service can still read the shared transfer-started contract fixture published by
+ * transaction-service (see TransferStartedContractTest there). A field this class declares that no
+ * longer exists (or was renamed) in the fixture deserializes to null here instead of failing
+ * silently at runtime.
  */
 class TransactionCreatedEventContractTest {
 
@@ -19,8 +19,9 @@ class TransactionCreatedEventContractTest {
 
     @Test
     void deserializesTransferStartedContract() {
-        TransactionCreatedEvent event = objectMapper.readValue(ContractFixtures.read("transfer-started"),
-                TransactionCreatedEvent.class);
+        TransactionCreatedEvent event =
+                objectMapper.readValue(
+                        ContractFixtures.read("transfer-started"), TransactionCreatedEvent.class);
 
         assertThat(event.transactionId()).isEqualTo("8f14e45f-ceea-467e-adde-3fb5c8e75f92");
         assertThat(event.type()).isEqualTo("TRANSFER");

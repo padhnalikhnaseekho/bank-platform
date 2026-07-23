@@ -23,11 +23,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ApplyPaymentOutcomeUseCaseTest {
 
-    @Mock
-    private PaymentAttemptRepository paymentAttemptRepository;
+    @Mock private PaymentAttemptRepository paymentAttemptRepository;
 
-    @Mock
-    private EventPublisher eventPublisher;
+    @Mock private EventPublisher eventPublisher;
 
     private ApplyPaymentOutcomeUseCase useCase;
 
@@ -40,34 +38,45 @@ class ApplyPaymentOutcomeUseCaseTest {
     void marksTheMatchingAttemptSucceededAndPublishesPaymentSuccess() {
         UUID transactionId = UUID.randomUUID();
         PaymentAttempt attempt = PaymentAttempt.create(PaymentId.newId(), transactionId);
-        when(paymentAttemptRepository.findByTransactionId(transactionId)).thenReturn(Optional.of(attempt));
+        when(paymentAttemptRepository.findByTransactionId(transactionId))
+                .thenReturn(Optional.of(attempt));
 
         useCase.execute(transactionId, true, null);
 
         assertThat(attempt.status()).isEqualTo(PaymentAttemptStatus.SUCCEEDED);
         verify(paymentAttemptRepository).save(attempt);
-        verify(eventPublisher).publish(eq("payment-success"), eq("PaymentAttempt"), eq(attempt.id().toString()),
-                any());
+        verify(eventPublisher)
+                .publish(
+                        eq("payment-success"),
+                        eq("PaymentAttempt"),
+                        eq(attempt.id().toString()),
+                        any());
     }
 
     @Test
     void marksTheMatchingAttemptFailedAndPublishesPaymentFailed() {
         UUID transactionId = UUID.randomUUID();
         PaymentAttempt attempt = PaymentAttempt.create(PaymentId.newId(), transactionId);
-        when(paymentAttemptRepository.findByTransactionId(transactionId)).thenReturn(Optional.of(attempt));
+        when(paymentAttemptRepository.findByTransactionId(transactionId))
+                .thenReturn(Optional.of(attempt));
 
         useCase.execute(transactionId, false, "Insufficient funds");
 
         assertThat(attempt.status()).isEqualTo(PaymentAttemptStatus.FAILED);
         assertThat(attempt.failureReason()).isEqualTo("Insufficient funds");
-        verify(eventPublisher).publish(eq("payment-failed"), eq("PaymentAttempt"), eq(attempt.id().toString()),
-                any());
+        verify(eventPublisher)
+                .publish(
+                        eq("payment-failed"),
+                        eq("PaymentAttempt"),
+                        eq(attempt.id().toString()),
+                        any());
     }
 
     @Test
     void ignoresTransferOutcomesThatDoNotBelongToAnyPaymentAttempt() {
         UUID transactionId = UUID.randomUUID();
-        when(paymentAttemptRepository.findByTransactionId(transactionId)).thenReturn(Optional.empty());
+        when(paymentAttemptRepository.findByTransactionId(transactionId))
+                .thenReturn(Optional.empty());
 
         useCase.execute(transactionId, true, null);
 

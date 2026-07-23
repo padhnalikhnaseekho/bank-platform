@@ -26,11 +26,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ApplyTransactionOutcomeUseCaseTest {
 
-    @Mock
-    private TransactionRepository transactionRepository;
+    @Mock private TransactionRepository transactionRepository;
 
-    @Mock
-    private EventPublisher eventPublisher;
+    @Mock private EventPublisher eventPublisher;
 
     private ApplyTransactionOutcomeUseCase useCase;
 
@@ -40,8 +38,13 @@ class ApplyTransactionOutcomeUseCaseTest {
     }
 
     private Transaction processingTransaction() {
-        Transaction transaction = Transaction.receive(UUID.randomUUID(), TransactionType.DEPOSIT,
-                Money.of(new BigDecimal("50.00"), "INR"), null, UUID.randomUUID());
+        Transaction transaction =
+                Transaction.receive(
+                        UUID.randomUUID(),
+                        TransactionType.DEPOSIT,
+                        Money.of(new BigDecimal("50.00"), "INR"),
+                        null,
+                        UUID.randomUUID());
         transaction.validate();
         transaction.markProcessing();
         return transaction;
@@ -56,8 +59,12 @@ class ApplyTransactionOutcomeUseCaseTest {
         useCase.execute(transaction.id().toString(), true);
 
         assertThat(transaction.status()).isEqualTo(TransactionStatus.COMPLETED);
-        verify(eventPublisher).publish(eq("transaction-status-changed"), eq("Transaction"),
-                eq(transaction.id().toString()), any());
+        verify(eventPublisher)
+                .publish(
+                        eq("transaction-status-changed"),
+                        eq("Transaction"),
+                        eq(transaction.id().toString()),
+                        any());
     }
 
     @Test
@@ -69,8 +76,12 @@ class ApplyTransactionOutcomeUseCaseTest {
         useCase.execute(transaction.id().toString(), false);
 
         assertThat(transaction.status()).isEqualTo(TransactionStatus.FAILED);
-        verify(eventPublisher).publish(eq("transaction-status-changed"), eq("Transaction"),
-                eq(transaction.id().toString()), any());
+        verify(eventPublisher)
+                .publish(
+                        eq("transaction-status-changed"),
+                        eq("Transaction"),
+                        eq(transaction.id().toString()),
+                        any());
     }
 
     @Test
@@ -78,6 +89,7 @@ class ApplyTransactionOutcomeUseCaseTest {
         TransactionId id = TransactionId.newId();
         when(transactionRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> useCase.execute(id.toString(), true)).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> useCase.execute(id.toString(), true))
+                .isInstanceOf(IllegalStateException.class);
     }
 }

@@ -17,8 +17,16 @@ public class Account {
     private final Instant createdAt;
     private Instant updatedAt;
 
-    public Account(AccountId id, UUID customerId, String accountNumber, AccountType type, AccountStatus status,
-            Money balance, long version, Instant createdAt, Instant updatedAt) {
+    public Account(
+            AccountId id,
+            UUID customerId,
+            String accountNumber,
+            AccountType type,
+            AccountStatus status,
+            Money balance,
+            long version,
+            Instant createdAt,
+            Instant updatedAt) {
         this.id = id;
         this.customerId = customerId;
         this.accountNumber = accountNumber;
@@ -30,13 +38,25 @@ public class Account {
         this.updatedAt = updatedAt;
     }
 
-    public static Account open(UUID customerId, String accountNumber, AccountType type, String currencyCode) {
+    public static Account open(
+            UUID customerId, String accountNumber, AccountType type, String currencyCode) {
         Instant now = Instant.now();
-        return new Account(AccountId.newId(), customerId, accountNumber, type, AccountStatus.ACTIVE,
-                Money.zero(currencyCode), 0L, now, now);
+        return new Account(
+                AccountId.newId(),
+                customerId,
+                accountNumber,
+                type,
+                AccountStatus.ACTIVE,
+                Money.zero(currencyCode),
+                0L,
+                now,
+                now);
     }
 
-    /** No per-account overdraft limit is modeled yet (plan/DATABASE.md has no such column) — Phase 1 disallows any overdraft. */
+    /**
+     * No per-account overdraft limit is modeled yet (plan/DATABASE.md has no such column) — Phase 1
+     * disallows any overdraft.
+     */
     public LedgerEntry debit(Money amount, String referenceId) {
         requireActive();
         requirePositive(amount);

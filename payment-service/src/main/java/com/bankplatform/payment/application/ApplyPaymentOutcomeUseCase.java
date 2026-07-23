@@ -11,9 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Kept as its own bean (rather than inlined in PaymentOutcomeListener) so the transactional
- * boundary is enforced through a real Spring proxy — calling an {@code @Transactional}
- * method on {@code this} from within the same class silently skips the transaction, since
- * self-invocation never goes through the proxy, in CGLIB just as much as JDK proxies.
+ * boundary is enforced through a real Spring proxy — calling an {@code @Transactional} method on
+ * {@code this} from within the same class silently skips the transaction, since self-invocation
+ * never goes through the proxy, in CGLIB just as much as JDK proxies.
  */
 @Service
 public class ApplyPaymentOutcomeUseCase {
@@ -21,15 +21,16 @@ public class ApplyPaymentOutcomeUseCase {
     private final PaymentAttemptRepository paymentAttemptRepository;
     private final EventPublisher eventPublisher;
 
-    public ApplyPaymentOutcomeUseCase(PaymentAttemptRepository paymentAttemptRepository,
-            EventPublisher eventPublisher) {
+    public ApplyPaymentOutcomeUseCase(
+            PaymentAttemptRepository paymentAttemptRepository, EventPublisher eventPublisher) {
         this.paymentAttemptRepository = paymentAttemptRepository;
         this.eventPublisher = eventPublisher;
     }
 
     @Transactional
     public void execute(UUID transactionId, boolean success, String failureReason) {
-        Optional<PaymentAttempt> maybeAttempt = paymentAttemptRepository.findByTransactionId(transactionId);
+        Optional<PaymentAttempt> maybeAttempt =
+                paymentAttemptRepository.findByTransactionId(transactionId);
         if (maybeAttempt.isEmpty()) {
             return;
         }
@@ -42,8 +43,15 @@ public class ApplyPaymentOutcomeUseCase {
         paymentAttemptRepository.save(attempt);
 
         String eventType = success ? "payment-success" : "payment-failed";
-        eventPublisher.publish(eventType, "PaymentAttempt", attempt.id().toString(),
-                new PaymentOutcomePayload(attempt.paymentInstructionId().toString(), attempt.id().toString(),
-                        transactionId.toString(), attempt.status().name(), attempt.failureReason()));
+        eventPublisher.publish(
+                eventType,
+                "PaymentAttempt",
+                attempt.id().toString(),
+                new PaymentOutcomePayload(
+                        attempt.paymentInstructionId().toString(),
+                        attempt.id().toString(),
+                        transactionId.toString(),
+                        attempt.status().name(),
+                        attempt.failureReason()));
     }
 }

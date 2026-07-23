@@ -22,11 +22,15 @@ public class AuditController {
 
     @GetMapping("/events")
     @PreAuthorize("hasRole('ADMIN')")
-    public AuditEventListResponse search(@RequestParam(required = false) String aggregateId,
-            @RequestParam(required = false) String eventType, @RequestParam(required = false) Instant from,
-            @RequestParam(required = false) Instant to, @RequestParam(defaultValue = "0") int page,
+    public AuditEventListResponse search(
+            @RequestParam(required = false) String aggregateId,
+            @RequestParam(required = false) String eventType,
+            @RequestParam(required = false) Instant from,
+            @RequestParam(required = false) Instant to,
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return AuditEventListResponse.from(
-                searchAuditEventsUseCase.search(aggregateId, eventType, from, to, PageRequest.of(page, size)));
+                searchAuditEventsUseCase.search(
+                        aggregateId, eventType, from, to, PageRequest.of(page, size)));
     }
 }

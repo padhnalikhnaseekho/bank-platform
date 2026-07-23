@@ -20,8 +20,16 @@ public class User {
     private final Instant createdAt;
     private final Instant updatedAt;
 
-    public User(UserId id, Email email, String phone, String fullName, Status status, Set<Role> roles,
-            Credential credential, Instant createdAt, Instant updatedAt) {
+    public User(
+            UserId id,
+            Email email,
+            String phone,
+            String fullName,
+            Status status,
+            Set<Role> roles,
+            Credential credential,
+            Instant createdAt,
+            Instant updatedAt) {
         this.id = id;
         this.email = email;
         this.phone = phone;
@@ -37,7 +45,16 @@ public class User {
         UserId id = UserId.newId();
         Instant now = Instant.now();
         Credential credential = Credential.create(id, passwordHash);
-        return new User(id, email, phone, fullName, Status.ACTIVE, Set.of(Role.CUSTOMER), credential, now, now);
+        return new User(
+                id,
+                email,
+                phone,
+                fullName,
+                Status.ACTIVE,
+                Set.of(Role.CUSTOMER),
+                credential,
+                now,
+                now);
     }
 
     public boolean isActive() {

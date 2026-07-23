@@ -17,25 +17,40 @@ public class CreateTransferUseCase {
     private final TransactionRepository transactionRepository;
     private final EventPublisher eventPublisher;
 
-    public CreateTransferUseCase(TransactionRepository transactionRepository, EventPublisher eventPublisher) {
+    public CreateTransferUseCase(
+            TransactionRepository transactionRepository, EventPublisher eventPublisher) {
         this.transactionRepository = transactionRepository;
         this.eventPublisher = eventPublisher;
     }
 
     @Transactional
-    public Transaction execute(UUID customerId, UUID sourceAccountId, UUID targetAccountId, Money amount) {
+    public Transaction execute(
+            UUID customerId, UUID sourceAccountId, UUID targetAccountId, Money amount) {
         if (sourceAccountId.equals(targetAccountId)) {
             throw new ValidationException("Source and target account must be different");
         }
-        Transaction transaction = Transaction.receive(customerId, TransactionType.TRANSFER, amount, sourceAccountId,
-                targetAccountId);
+        Transaction transaction =
+                Transaction.receive(
+                        customerId,
+                        TransactionType.TRANSFER,
+                        amount,
+                        sourceAccountId,
+                        targetAccountId);
         transaction.validate();
         transaction.markProcessing();
         Transaction saved = transactionRepository.save(transaction);
 
-        eventPublisher.publish("transfer-started", "Transaction", saved.id().toString(),
-                new TransactionEventPayload(saved.id().toString(), "TRANSFER", sourceAccountId.toString(),
-                        targetAccountId.toString(), amount.amount(), amount.currency().getCurrencyCode()));
+        eventPublisher.publish(
+                "transfer-started",
+                "Transaction",
+                saved.id().toString(),
+                new TransactionEventPayload(
+                        saved.id().toString(),
+                        "TRANSFER",
+                        sourceAccountId.toString(),
+                        targetAccountId.toString(),
+                        amount.amount(),
+                        amount.currency().getCurrencyCode()));
         return saved;
     }
 }

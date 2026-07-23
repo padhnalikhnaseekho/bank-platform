@@ -9,5 +9,6 @@ public interface AuditEventRepository {
 
     void save(AuditEvent event);
 
-    Page<AuditEvent> search(String aggregateId, String eventType, Instant from, Instant to, Pageable pageable);
+    Page<AuditEvent> search(
+            String aggregateId, String eventType, Instant from, Instant to, Pageable pageable);
 }

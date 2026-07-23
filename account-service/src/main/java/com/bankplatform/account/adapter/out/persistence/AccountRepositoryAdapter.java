@@ -17,7 +17,8 @@ public class AccountRepositoryAdapter implements AccountRepository {
     private final AccountJpaRepository accountJpaRepository;
     private final LedgerEntryJpaRepository ledgerEntryJpaRepository;
 
-    public AccountRepositoryAdapter(AccountJpaRepository accountJpaRepository,
+    public AccountRepositoryAdapter(
+            AccountJpaRepository accountJpaRepository,
             LedgerEntryJpaRepository ledgerEntryJpaRepository) {
         this.accountJpaRepository = accountJpaRepository;
         this.ledgerEntryJpaRepository = ledgerEntryJpaRepository;
@@ -25,12 +26,15 @@ public class AccountRepositoryAdapter implements AccountRepository {
 
     @Override
     public Account save(Account account) {
-        AccountEntity entity = accountJpaRepository.findById(account.id().value())
-                .map(existing -> {
-                    AccountMapper.applyToExisting(existing, account);
-                    return existing;
-                })
-                .orElseGet(() -> AccountMapper.toNewEntity(account));
+        AccountEntity entity =
+                accountJpaRepository
+                        .findById(account.id().value())
+                        .map(
+                                existing -> {
+                                    AccountMapper.applyToExisting(existing, account);
+                                    return existing;
+                                })
+                        .orElseGet(() -> AccountMapper.toNewEntity(account));
         AccountEntity saved = accountJpaRepository.save(entity);
         return AccountMapper.toDomain(saved);
     }
@@ -46,10 +50,13 @@ public class AccountRepositoryAdapter implements AccountRepository {
     }
 
     @Override
-    public Page<Account> findByCustomerId(UUID customerId, AccountStatus status, Pageable pageable) {
-        Page<AccountEntity> page = status != null
-                ? accountJpaRepository.findByCustomerIdAndStatus(customerId, status.name(), pageable)
-                : accountJpaRepository.findByCustomerId(customerId, pageable);
+    public Page<Account> findByCustomerId(
+            UUID customerId, AccountStatus status, Pageable pageable) {
+        Page<AccountEntity> page =
+                status != null
+                        ? accountJpaRepository.findByCustomerIdAndStatus(
+                                customerId, status.name(), pageable)
+                        : accountJpaRepository.findByCustomerId(customerId, pageable);
         return page.map(AccountMapper::toDomain);
     }
 

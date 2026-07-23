@@ -17,8 +17,10 @@ public class TransactionOutcomeListener {
     private final IdempotentEventProcessor idempotentEventProcessor;
     private final ObjectMapper objectMapper;
 
-    public TransactionOutcomeListener(ApplyTransactionOutcomeUseCase applyTransactionOutcomeUseCase,
-            IdempotentEventProcessor idempotentEventProcessor, ObjectMapper objectMapper) {
+    public TransactionOutcomeListener(
+            ApplyTransactionOutcomeUseCase applyTransactionOutcomeUseCase,
+            IdempotentEventProcessor idempotentEventProcessor,
+            ObjectMapper objectMapper) {
         this.applyTransactionOutcomeUseCase = applyTransactionOutcomeUseCase;
         this.idempotentEventProcessor = idempotentEventProcessor;
         this.objectMapper = objectMapper;
@@ -46,22 +48,37 @@ public class TransactionOutcomeListener {
 
     private void handleMoneyMovement(String message) {
         EventEnvelope envelope = objectMapper.readValue(message, EventEnvelope.class);
-        EventProcessingContext.withCorrelation(envelope, () -> idempotentEventProcessor.process(envelope.eventId(),
-                envelope.eventType(), () -> {
-                    MoneyMovementOutcomeEvent payload = objectMapper.convertValue(envelope.payload(),
-                            MoneyMovementOutcomeEvent.class);
-                    applyTransactionOutcomeUseCase.execute(payload.transactionId(),
-                            "COMPLETED".equals(payload.status()));
-                }));
+        EventProcessingContext.withCorrelation(
+                envelope,
+                () ->
+                        idempotentEventProcessor.process(
+                                envelope.eventId(),
+                                envelope.eventType(),
+                                () -> {
+                                    MoneyMovementOutcomeEvent payload =
+                                            objectMapper.convertValue(
+                                                    envelope.payload(),
+                                                    MoneyMovementOutcomeEvent.class);
+                                    applyTransactionOutcomeUseCase.execute(
+                                            payload.transactionId(),
+                                            "COMPLETED".equals(payload.status()));
+                                }));
     }
 
     private void handleTransferOutcome(String message, boolean success) {
         EventEnvelope envelope = objectMapper.readValue(message, EventEnvelope.class);
-        EventProcessingContext.withCorrelation(envelope, () -> idempotentEventProcessor.process(envelope.eventId(),
-                envelope.eventType(), () -> {
-                    TransferOutcomeEvent payload = objectMapper.convertValue(envelope.payload(),
-                            TransferOutcomeEvent.class);
-                    applyTransactionOutcomeUseCase.execute(payload.transactionId(), success);
-                }));
+        EventProcessingContext.withCorrelation(
+                envelope,
+                () ->
+                        idempotentEventProcessor.process(
+                                envelope.eventId(),
+                                envelope.eventType(),
+                                () -> {
+                                    TransferOutcomeEvent payload =
+                                            objectMapper.convertValue(
+                                                    envelope.payload(), TransferOutcomeEvent.class);
+                                    applyTransactionOutcomeUseCase.execute(
+                                            payload.transactionId(), success);
+                                }));
     }
 }

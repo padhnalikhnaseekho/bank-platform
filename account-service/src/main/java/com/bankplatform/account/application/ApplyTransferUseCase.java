@@ -16,13 +16,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Kept as its own bean (rather than inlined in TransferListener) so the transactional
- * boundary is enforced through a real Spring proxy — calling an {@code @Transactional}
- * method on {@code this} from within the same class silently skips the transaction, since
- * self-invocation never goes through the proxy, in CGLIB just as much as JDK proxies.
+ * Kept as its own bean (rather than inlined in TransferListener) so the transactional boundary is
+ * enforced through a real Spring proxy — calling an {@code @Transactional} method on {@code this}
+ * from within the same class silently skips the transaction, since self-invocation never goes
+ * through the proxy, in CGLIB just as much as JDK proxies.
  *
- * <p>Debits the source and credits the target in one transaction — both accounts live in
- * this same service's database, so no distributed saga/compensation is needed here.
+ * <p>Debits the source and credits the target in one transaction — both accounts live in this same
+ * service's database, so no distributed saga/compensation is needed here.
  */
 @Service
 public class ApplyTransferUseCase {
@@ -30,7 +30,8 @@ public class ApplyTransferUseCase {
     private final AccountRepository accountRepository;
     private final EventPublisher eventPublisher;
 
-    public ApplyTransferUseCase(AccountRepository accountRepository, EventPublisher eventPublisher) {
+    public ApplyTransferUseCase(
+            AccountRepository accountRepository, EventPublisher eventPublisher) {
         this.accountRepository = accountRepository;
         this.eventPublisher = eventPublisher;
     }
@@ -68,9 +69,18 @@ public class ApplyTransferUseCase {
         }
 
         String eventType = success ? "transfer-completed" : "transfer-failed";
-        eventPublisher.publish(eventType, "Transfer", payload.transactionId(),
-                new TransferOutcomePayload(payload.transactionId(), payload.sourceAccountId(),
-                        payload.targetAccountId(), sourceCustomerId, targetCustomerId, payload.amount(),
-                        payload.currency(), failureReason));
+        eventPublisher.publish(
+                eventType,
+                "Transfer",
+                payload.transactionId(),
+                new TransferOutcomePayload(
+                        payload.transactionId(),
+                        payload.sourceAccountId(),
+                        payload.targetAccountId(),
+                        sourceCustomerId,
+                        targetCustomerId,
+                        payload.amount(),
+                        payload.currency(),
+                        failureReason));
     }
 }

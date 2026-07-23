@@ -14,7 +14,8 @@ public class UserRepositoryAdapter implements UserRepository {
     private final UserJpaRepository userJpaRepository;
     private final RoleJpaRepository roleJpaRepository;
 
-    public UserRepositoryAdapter(UserJpaRepository userJpaRepository, RoleJpaRepository roleJpaRepository) {
+    public UserRepositoryAdapter(
+            UserJpaRepository userJpaRepository, RoleJpaRepository roleJpaRepository) {
         this.userJpaRepository = userJpaRepository;
         this.roleJpaRepository = roleJpaRepository;
     }
@@ -42,7 +43,8 @@ public class UserRepositoryAdapter implements UserRepository {
     }
 
     private RoleEntity resolveRoleEntity(Role role) {
-        return roleJpaRepository.findByName(role.name())
+        return roleJpaRepository
+                .findByName(role.name())
                 .orElseThrow(() -> new IllegalStateException("Role not seeded: " + role.name()));
     }
 }

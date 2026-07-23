@@ -27,11 +27,9 @@ class IdempotencyGuardTest {
 
     private record RequestBody(String field) {}
 
-    @Mock
-    private IdempotencyRepository idempotencyRepository;
+    @Mock private IdempotencyRepository idempotencyRepository;
 
-    @Mock
-    private Supplier<TransactionResult> action;
+    @Mock private Supplier<TransactionResult> action;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -60,8 +58,9 @@ class IdempotencyGuardTest {
         RequestBody requestBody = new RequestBody("a");
         String requestHash = hash(requestBody);
         TransactionResult originalResult = new TransactionResult(UUID.randomUUID(), "PROCESSING");
-        IdempotencyRecord existing = IdempotencyRecord.create("key-1", requestHash,
-                objectMapper.writeValueAsString(originalResult), 202);
+        IdempotencyRecord existing =
+                IdempotencyRecord.create(
+                        "key-1", requestHash, objectMapper.writeValueAsString(originalResult), 202);
         when(idempotencyRepository.findByKey("key-1")).thenReturn(Optional.of(existing));
 
         TransactionResult actual = guard.execute("key-1", requestBody, action);
@@ -73,8 +72,13 @@ class IdempotencyGuardTest {
 
     @Test
     void reusingTheSameKeyWithADifferentRequestIsAConflict() {
-        IdempotencyRecord existing = IdempotencyRecord.create("key-1", hash(new RequestBody("original")),
-                objectMapper.writeValueAsString(new TransactionResult(UUID.randomUUID(), "PROCESSING")), 202);
+        IdempotencyRecord existing =
+                IdempotencyRecord.create(
+                        "key-1",
+                        hash(new RequestBody("original")),
+                        objectMapper.writeValueAsString(
+                                new TransactionResult(UUID.randomUUID(), "PROCESSING")),
+                        202);
         when(idempotencyRepository.findByKey("key-1")).thenReturn(Optional.of(existing));
 
         assertThatThrownBy(() -> guard.execute("key-1", new RequestBody("different"), action))
@@ -87,13 +91,16 @@ class IdempotencyGuardTest {
         RequestBody requestBody = new RequestBody("a");
         String requestHash = hash(requestBody);
         TransactionResult racersResult = new TransactionResult(UUID.randomUUID(), "PROCESSING");
-        IdempotencyRecord racersRecord = IdempotencyRecord.create("key-1", requestHash,
-                objectMapper.writeValueAsString(racersResult), 202);
+        IdempotencyRecord racersRecord =
+                IdempotencyRecord.create(
+                        "key-1", requestHash, objectMapper.writeValueAsString(racersResult), 202);
 
-        when(idempotencyRepository.findByKey("key-1")).thenReturn(Optional.empty(), Optional.of(racersRecord));
+        when(idempotencyRepository.findByKey("key-1"))
+                .thenReturn(Optional.empty(), Optional.of(racersRecord));
         when(action.get()).thenReturn(new TransactionResult(UUID.randomUUID(), "PROCESSING"));
         org.mockito.Mockito.doThrow(new DataIntegrityViolationException("duplicate key"))
-                .when(idempotencyRepository).save(any());
+                .when(idempotencyRepository)
+                .save(any());
 
         TransactionResult actual = guard.execute("key-1", requestBody, action);
 

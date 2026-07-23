@@ -16,7 +16,9 @@ public class RegisterUserUseCase {
     private final PasswordHasher passwordHasher;
     private final EventPublisher eventPublisher;
 
-    public RegisterUserUseCase(UserRepository userRepository, PasswordHasher passwordHasher,
+    public RegisterUserUseCase(
+            UserRepository userRepository,
+            PasswordHasher passwordHasher,
             EventPublisher eventPublisher) {
         this.userRepository = userRepository;
         this.passwordHasher = passwordHasher;
@@ -32,7 +34,8 @@ public class RegisterUserUseCase {
         String passwordHash = passwordHasher.hash(rawPassword);
         User user = User.register(email, phone, fullName, passwordHash);
         User saved = userRepository.save(user);
-        eventPublisher.publish("user-created", "User", saved.id().toString(), UserCreatedPayload.from(saved));
+        eventPublisher.publish(
+                "user-created", "User", saved.id().toString(), UserCreatedPayload.from(saved));
         return saved;
     }
 }

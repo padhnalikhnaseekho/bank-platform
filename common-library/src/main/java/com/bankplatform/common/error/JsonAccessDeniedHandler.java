@@ -16,7 +16,10 @@ public class JsonAccessDeniedHandler implements AccessDeniedHandler {
     }
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException)
+    public void handle(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            AccessDeniedException accessDeniedException)
             throws IOException {
         writer.write(response, HttpStatus.FORBIDDEN, "FORBIDDEN", "Access is denied");
     }

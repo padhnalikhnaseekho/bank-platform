@@ -18,11 +18,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class OpenAccountUseCaseTest {
 
-    @Mock
-    private AccountRepository accountRepository;
+    @Mock private AccountRepository accountRepository;
 
-    @Mock
-    private EventPublisher eventPublisher;
+    @Mock private EventPublisher eventPublisher;
 
     private OpenAccountUseCase useCase;
 
@@ -46,7 +44,8 @@ class OpenAccountUseCaseTest {
 
     @Test
     void retriesOnAccountNumberCollision() {
-        when(accountRepository.existsByAccountNumber(any(String.class))).thenReturn(true, true, false);
+        when(accountRepository.existsByAccountNumber(any(String.class)))
+                .thenReturn(true, true, false);
         when(accountRepository.save(any(Account.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Account account = useCase.open(UUID.randomUUID(), AccountType.CURRENT, "INR");

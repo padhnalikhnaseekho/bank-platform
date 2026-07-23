@@ -9,10 +9,10 @@ import tools.jackson.databind.ObjectMapper;
 
 /**
  * Verifies transaction-service can still read the shared transfer-completed/transfer-failed
- * contract fixtures published by account-service (see
- * TransferOutcomePayloadContractTest there). This DTO deliberately only declares a subset of
- * the contract's fields (no sourceCustomerId/targetCustomerId, unlike every other consumer) —
- * this test locks in that this is a subset by choice, not by an accidental typo.
+ * contract fixtures published by account-service (see TransferOutcomePayloadContractTest there).
+ * This DTO deliberately only declares a subset of the contract's fields (no
+ * sourceCustomerId/targetCustomerId, unlike every other consumer) — this test locks in that this is
+ * a subset by choice, not by an accidental typo.
  */
 class TransferOutcomeEventContractTest {
 
@@ -20,8 +20,9 @@ class TransferOutcomeEventContractTest {
 
     @Test
     void deserializesTransferCompletedContract() {
-        TransferOutcomeEvent event = objectMapper.readValue(ContractFixtures.read("transfer-completed"),
-                TransferOutcomeEvent.class);
+        TransferOutcomeEvent event =
+                objectMapper.readValue(
+                        ContractFixtures.read("transfer-completed"), TransferOutcomeEvent.class);
 
         assertThat(event.transactionId()).isEqualTo("8f14e45f-ceea-467e-adde-3fb5c8e75f92");
         assertThat(event.sourceAccountId()).isEqualTo("b3816b1d-8760-4f2e-9b6e-2b1f8f5d9a01");
@@ -31,8 +32,9 @@ class TransferOutcomeEventContractTest {
 
     @Test
     void deserializesTransferFailedContract() {
-        TransferOutcomeEvent event = objectMapper.readValue(ContractFixtures.read("transfer-failed"),
-                TransferOutcomeEvent.class);
+        TransferOutcomeEvent event =
+                objectMapper.readValue(
+                        ContractFixtures.read("transfer-failed"), TransferOutcomeEvent.class);
 
         assertThat(event.failureReason()).isEqualTo("INSUFFICIENT_FUNDS");
     }

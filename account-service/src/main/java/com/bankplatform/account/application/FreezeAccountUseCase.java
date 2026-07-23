@@ -14,18 +14,25 @@ public class FreezeAccountUseCase {
     private final AccountRepository accountRepository;
     private final EventPublisher eventPublisher;
 
-    public FreezeAccountUseCase(AccountRepository accountRepository, EventPublisher eventPublisher) {
+    public FreezeAccountUseCase(
+            AccountRepository accountRepository, EventPublisher eventPublisher) {
         this.accountRepository = accountRepository;
         this.eventPublisher = eventPublisher;
     }
 
     @Transactional
     public Account freeze(AccountId id) {
-        Account account = accountRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Account not found"));
+        Account account =
+                accountRepository
+                        .findById(id)
+                        .orElseThrow(() -> new NotFoundException("Account not found"));
         account.freeze();
         Account saved = accountRepository.save(account);
-        eventPublisher.publish("account-frozen", "Account", saved.id().toString(), AccountEventPayload.from(saved));
+        eventPublisher.publish(
+                "account-frozen",
+                "Account",
+                saved.id().toString(),
+                AccountEventPayload.from(saved));
         return saved;
     }
 }

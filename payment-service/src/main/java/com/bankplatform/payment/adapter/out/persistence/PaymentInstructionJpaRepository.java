@@ -6,8 +6,9 @@ import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PaymentInstructionJpaRepository extends JpaRepository<PaymentInstructionEntity, UUID> {
+public interface PaymentInstructionJpaRepository
+        extends JpaRepository<PaymentInstructionEntity, UUID> {
 
-    List<PaymentInstructionEntity> findByStatusAndNextRunAtLessThanEqualOrderByNextRunAtAsc(String status,
-            Instant now, Pageable pageable);
+    List<PaymentInstructionEntity> findByStatusAndNextRunAtLessThanEqualOrderByNextRunAtAsc(
+            String status, Instant now, Pageable pageable);
 }

@@ -11,8 +11,7 @@ import java.util.UUID;
 @Table(name = "outbox_events")
 public class OutboxEventEntity {
 
-    @Id
-    private UUID id;
+    @Id private UUID id;
 
     @Column(name = "aggregate_type", nullable = false)
     private String aggregateType;
@@ -49,8 +48,15 @@ public class OutboxEventEntity {
 
     protected OutboxEventEntity() {}
 
-    public OutboxEventEntity(UUID id, String aggregateType, String aggregateId, String eventType, int eventVersion,
-            String payload, String correlationId, Instant createdAt) {
+    public OutboxEventEntity(
+            UUID id,
+            String aggregateType,
+            String aggregateId,
+            String eventType,
+            int eventVersion,
+            String payload,
+            String correlationId,
+            Instant createdAt) {
         this.id = id;
         this.aggregateType = aggregateType;
         this.aggregateId = aggregateId;

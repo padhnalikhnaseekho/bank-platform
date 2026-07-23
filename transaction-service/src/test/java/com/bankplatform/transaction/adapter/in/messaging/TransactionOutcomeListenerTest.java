@@ -22,39 +22,62 @@ import tools.jackson.databind.ObjectMapper;
 @ExtendWith(MockitoExtension.class)
 class TransactionOutcomeListenerTest {
 
-    @Mock
-    private ApplyTransactionOutcomeUseCase applyTransactionOutcomeUseCase;
+    @Mock private ApplyTransactionOutcomeUseCase applyTransactionOutcomeUseCase;
 
-    @Mock
-    private IdempotentEventProcessor idempotentEventProcessor;
+    @Mock private IdempotentEventProcessor idempotentEventProcessor;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private TransactionOutcomeListener listener;
 
-    private record MoneyMovementPayload(String transactionId, String accountId, BigDecimal amount, String currency,
-            String status, String failureReason) {}
+    private record MoneyMovementPayload(
+            String transactionId,
+            String accountId,
+            BigDecimal amount,
+            String currency,
+            String status,
+            String failureReason) {}
 
-    private record TransferPayload(String transactionId, String sourceAccountId, String targetAccountId,
-            BigDecimal amount, String currency, String failureReason) {}
+    private record TransferPayload(
+            String transactionId,
+            String sourceAccountId,
+            String targetAccountId,
+            BigDecimal amount,
+            String currency,
+            String failureReason) {}
 
     @BeforeEach
     void setUp() {
-        listener = new TransactionOutcomeListener(applyTransactionOutcomeUseCase, idempotentEventProcessor,
-                objectMapper);
+        listener =
+                new TransactionOutcomeListener(
+                        applyTransactionOutcomeUseCase, idempotentEventProcessor, objectMapper);
     }
 
     private void stubProcessorToRunHandler() {
-        doAnswer(invocation -> {
-            Runnable handler = invocation.getArgument(2);
-            handler.run();
-            return null;
-        }).when(idempotentEventProcessor).process(any(), any(), any());
+        doAnswer(
+                        invocation -> {
+                            Runnable handler = invocation.getArgument(2);
+                            handler.run();
+                            return null;
+                        })
+                .when(idempotentEventProcessor)
+                .process(any(), any(), any());
     }
 
     private String toMessage(String eventType, Object payload, String transactionId) {
-        EventEnvelope envelope = new EventEnvelope(UUID.randomUUID(), eventType, 1, Instant.now(), "account-service",
-                "corr-1", null, "Transaction", transactionId, transactionId, payload);
+        EventEnvelope envelope =
+                new EventEnvelope(
+                        UUID.randomUUID(),
+                        eventType,
+                        1,
+                        Instant.now(),
+                        "account-service",
+                        "corr-1",
+                        null,
+                        "Transaction",
+                        transactionId,
+                        transactionId,
+                        payload);
         return objectMapper.writeValueAsString(envelope);
     }
 
@@ -62,8 +85,17 @@ class TransactionOutcomeListenerTest {
     void moneyDepositedCompletedDelegatesAsSuccess() {
         stubProcessorToRunHandler();
         String transactionId = UUID.randomUUID().toString();
-        String message = toMessage("money-deposited", new MoneyMovementPayload(transactionId,
-                UUID.randomUUID().toString(), new BigDecimal("50.00"), "INR", "COMPLETED", null), transactionId);
+        String message =
+                toMessage(
+                        "money-deposited",
+                        new MoneyMovementPayload(
+                                transactionId,
+                                UUID.randomUUID().toString(),
+                                new BigDecimal("50.00"),
+                                "INR",
+                                "COMPLETED",
+                                null),
+                        transactionId);
 
         listener.onMoneyDeposited(message);
 
@@ -74,10 +106,17 @@ class TransactionOutcomeListenerTest {
     void moneyWithdrawnFailedDelegatesAsFailure() {
         stubProcessorToRunHandler();
         String transactionId = UUID.randomUUID().toString();
-        String message = toMessage("money-withdrawn",
-                new MoneyMovementPayload(transactionId, UUID.randomUUID().toString(), new BigDecimal("50.00"), "INR",
-                        "FAILED", "Insufficient funds"),
-                transactionId);
+        String message =
+                toMessage(
+                        "money-withdrawn",
+                        new MoneyMovementPayload(
+                                transactionId,
+                                UUID.randomUUID().toString(),
+                                new BigDecimal("50.00"),
+                                "INR",
+                                "FAILED",
+                                "Insufficient funds"),
+                        transactionId);
 
         listener.onMoneyWithdrawn(message);
 
@@ -88,10 +127,17 @@ class TransactionOutcomeListenerTest {
     void transferCompletedDelegatesAsSuccess() {
         stubProcessorToRunHandler();
         String transactionId = UUID.randomUUID().toString();
-        String message = toMessage("transfer-completed",
-                new TransferPayload(transactionId, UUID.randomUUID().toString(), UUID.randomUUID().toString(),
-                        new BigDecimal("40.00"), "INR", null),
-                transactionId);
+        String message =
+                toMessage(
+                        "transfer-completed",
+                        new TransferPayload(
+                                transactionId,
+                                UUID.randomUUID().toString(),
+                                UUID.randomUUID().toString(),
+                                new BigDecimal("40.00"),
+                                "INR",
+                                null),
+                        transactionId);
 
         listener.onTransferCompleted(message);
 
@@ -102,10 +148,17 @@ class TransactionOutcomeListenerTest {
     void transferFailedDelegatesAsFailure() {
         stubProcessorToRunHandler();
         String transactionId = UUID.randomUUID().toString();
-        String message = toMessage("transfer-failed",
-                new TransferPayload(transactionId, UUID.randomUUID().toString(), UUID.randomUUID().toString(),
-                        new BigDecimal("40.00"), "INR", "Account not found"),
-                transactionId);
+        String message =
+                toMessage(
+                        "transfer-failed",
+                        new TransferPayload(
+                                transactionId,
+                                UUID.randomUUID().toString(),
+                                UUID.randomUUID().toString(),
+                                new BigDecimal("40.00"),
+                                "INR",
+                                "Account not found"),
+                        transactionId);
 
         listener.onTransferFailed(message);
 
@@ -115,8 +168,17 @@ class TransactionOutcomeListenerTest {
     @Test
     void skipsAlreadyProcessedEvents() {
         String transactionId = UUID.randomUUID().toString();
-        String message = toMessage("money-deposited", new MoneyMovementPayload(transactionId,
-                UUID.randomUUID().toString(), new BigDecimal("50.00"), "INR", "COMPLETED", null), transactionId);
+        String message =
+                toMessage(
+                        "money-deposited",
+                        new MoneyMovementPayload(
+                                transactionId,
+                                UUID.randomUUID().toString(),
+                                new BigDecimal("50.00"),
+                                "INR",
+                                "COMPLETED",
+                                null),
+                        transactionId);
 
         listener.onMoneyDeposited(message);
 

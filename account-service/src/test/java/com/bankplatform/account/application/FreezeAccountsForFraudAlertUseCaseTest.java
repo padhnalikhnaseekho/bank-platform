@@ -24,11 +24,9 @@ import org.springframework.data.domain.PageImpl;
 @ExtendWith(MockitoExtension.class)
 class FreezeAccountsForFraudAlertUseCaseTest {
 
-    @Mock
-    private AccountRepository accountRepository;
+    @Mock private AccountRepository accountRepository;
 
-    @Mock
-    private EventPublisher eventPublisher;
+    @Mock private EventPublisher eventPublisher;
 
     private FreezeAccountsForFraudAlertUseCase useCase;
 
@@ -51,8 +49,10 @@ class FreezeAccountsForFraudAlertUseCaseTest {
         assertThat(first.status()).isEqualTo(AccountStatus.FROZEN);
         assertThat(second.status()).isEqualTo(AccountStatus.FROZEN);
         verify(accountRepository, times(2)).save(any(Account.class));
-        verify(eventPublisher).publish(eq("account-frozen"), eq("Account"), eq(first.id().toString()), any());
-        verify(eventPublisher).publish(eq("account-frozen"), eq("Account"), eq(second.id().toString()), any());
+        verify(eventPublisher)
+                .publish(eq("account-frozen"), eq("Account"), eq(first.id().toString()), any());
+        verify(eventPublisher)
+                .publish(eq("account-frozen"), eq("Account"), eq(second.id().toString()), any());
     }
 
     @Test

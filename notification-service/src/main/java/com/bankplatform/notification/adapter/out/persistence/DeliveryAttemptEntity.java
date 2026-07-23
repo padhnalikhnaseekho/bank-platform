@@ -11,8 +11,7 @@ import java.util.UUID;
 @Table(name = "delivery_attempts")
 public class DeliveryAttemptEntity {
 
-    @Id
-    private UUID id;
+    @Id private UUID id;
 
     @Column(name = "notification_id", nullable = false)
     private UUID notificationId;
@@ -28,7 +27,11 @@ public class DeliveryAttemptEntity {
 
     protected DeliveryAttemptEntity() {}
 
-    public DeliveryAttemptEntity(UUID id, UUID notificationId, boolean success, String failureReason,
+    public DeliveryAttemptEntity(
+            UUID id,
+            UUID notificationId,
+            boolean success,
+            String failureReason,
             Instant attemptedAt) {
         this.id = id;
         this.notificationId = notificationId;

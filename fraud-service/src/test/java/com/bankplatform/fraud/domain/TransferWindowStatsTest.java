@@ -18,8 +18,10 @@ class TransferWindowStatsTest {
 
     @Test
     void plusAccumulatesCountAmountAndTracksTheLatestCurrency() {
-        TransferWindowStats stats = TransferWindowStats.zero().plus(new BigDecimal("100"), "INR")
-                .plus(new BigDecimal("50"), "INR");
+        TransferWindowStats stats =
+                TransferWindowStats.zero()
+                        .plus(new BigDecimal("100"), "INR")
+                        .plus(new BigDecimal("50"), "INR");
 
         assertThat(stats.count()).isEqualTo(2);
         assertThat(stats.totalAmount()).isEqualByComparingTo("150");

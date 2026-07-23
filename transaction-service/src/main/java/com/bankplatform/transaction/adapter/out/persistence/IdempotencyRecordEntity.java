@@ -11,8 +11,7 @@ import java.util.UUID;
 @Table(name = "idempotency_records")
 public class IdempotencyRecordEntity {
 
-    @Id
-    private UUID id;
+    @Id private UUID id;
 
     @Column(name = "idempotency_key", nullable = false, unique = true)
     private String idempotencyKey;
@@ -34,8 +33,14 @@ public class IdempotencyRecordEntity {
 
     protected IdempotencyRecordEntity() {}
 
-    public IdempotencyRecordEntity(UUID id, String idempotencyKey, String requestHash, String responseBody,
-            int statusCode, Instant createdAt, Instant expiresAt) {
+    public IdempotencyRecordEntity(
+            UUID id,
+            String idempotencyKey,
+            String requestHash,
+            String responseBody,
+            int statusCode,
+            Instant createdAt,
+            Instant expiresAt) {
         this.id = id;
         this.idempotencyKey = idempotencyKey;
         this.requestHash = requestHash;

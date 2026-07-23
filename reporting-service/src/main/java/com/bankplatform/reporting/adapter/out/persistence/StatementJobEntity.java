@@ -11,8 +11,7 @@ import java.util.UUID;
 @Table(name = "statement_jobs")
 public class StatementJobEntity {
 
-    @Id
-    private UUID id;
+    @Id private UUID id;
 
     @Column(name = "customer_id", nullable = false)
     private UUID customerId;
@@ -43,8 +42,17 @@ public class StatementJobEntity {
 
     protected StatementJobEntity() {}
 
-    public StatementJobEntity(UUID id, UUID customerId, UUID accountId, Instant periodStart, Instant periodEnd,
-            String status, String csvFileUrl, String pdfFileUrl, Instant createdAt, Instant updatedAt) {
+    public StatementJobEntity(
+            UUID id,
+            UUID customerId,
+            UUID accountId,
+            Instant periodStart,
+            Instant periodEnd,
+            String status,
+            String csvFileUrl,
+            String pdfFileUrl,
+            Instant createdAt,
+            Instant updatedAt) {
         this.id = id;
         this.customerId = customerId;
         this.accountId = accountId;

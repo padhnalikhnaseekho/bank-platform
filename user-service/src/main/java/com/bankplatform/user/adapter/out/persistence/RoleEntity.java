@@ -10,8 +10,7 @@ import java.util.UUID;
 @Table(name = "roles")
 public class RoleEntity {
 
-    @Id
-    private UUID id;
+    @Id private UUID id;
 
     @Column(nullable = false, unique = true)
     private String name;

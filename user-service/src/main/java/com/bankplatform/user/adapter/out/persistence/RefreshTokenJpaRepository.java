@@ -13,6 +13,7 @@ public interface RefreshTokenJpaRepository extends JpaRepository<RefreshTokenEnt
     Optional<RefreshTokenEntity> findByTokenHash(String tokenHash);
 
     @Modifying
-    @Query("update RefreshTokenEntity r set r.revokedAt = :now where r.userId = :userId and r.revokedAt is null")
+    @Query(
+            "update RefreshTokenEntity r set r.revokedAt = :now where r.userId = :userId and r.revokedAt is null")
     void revokeAllForUser(@Param("userId") UUID userId, @Param("now") Instant now);
 }

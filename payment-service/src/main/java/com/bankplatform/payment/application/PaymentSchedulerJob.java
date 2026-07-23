@@ -16,7 +16,8 @@ public class PaymentSchedulerJob {
     private final PaymentInstructionRepository paymentInstructionRepository;
     private final TriggerPaymentUseCase triggerPaymentUseCase;
 
-    public PaymentSchedulerJob(PaymentInstructionRepository paymentInstructionRepository,
+    public PaymentSchedulerJob(
+            PaymentInstructionRepository paymentInstructionRepository,
             TriggerPaymentUseCase triggerPaymentUseCase) {
         this.paymentInstructionRepository = paymentInstructionRepository;
         this.triggerPaymentUseCase = triggerPaymentUseCase;

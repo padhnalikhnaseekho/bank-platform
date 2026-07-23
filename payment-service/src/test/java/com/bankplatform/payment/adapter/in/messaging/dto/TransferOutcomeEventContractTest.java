@@ -7,9 +7,8 @@ import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
 
 /**
- * Verifies payment-service can still read the shared transfer-completed/transfer-failed
- * contract fixtures published by account-service (see
- * TransferOutcomePayloadContractTest there).
+ * Verifies payment-service can still read the shared transfer-completed/transfer-failed contract
+ * fixtures published by account-service (see TransferOutcomePayloadContractTest there).
  */
 class TransferOutcomeEventContractTest {
 
@@ -17,8 +16,9 @@ class TransferOutcomeEventContractTest {
 
     @Test
     void deserializesTransferCompletedContract() {
-        TransferOutcomeEvent event = objectMapper.readValue(ContractFixtures.read("transfer-completed"),
-                TransferOutcomeEvent.class);
+        TransferOutcomeEvent event =
+                objectMapper.readValue(
+                        ContractFixtures.read("transfer-completed"), TransferOutcomeEvent.class);
 
         assertThat(event.transactionId()).isEqualTo("8f14e45f-ceea-467e-adde-3fb5c8e75f92");
         assertThat(event.failureReason()).isNull();
@@ -26,8 +26,9 @@ class TransferOutcomeEventContractTest {
 
     @Test
     void deserializesTransferFailedContract() {
-        TransferOutcomeEvent event = objectMapper.readValue(ContractFixtures.read("transfer-failed"),
-                TransferOutcomeEvent.class);
+        TransferOutcomeEvent event =
+                objectMapper.readValue(
+                        ContractFixtures.read("transfer-failed"), TransferOutcomeEvent.class);
 
         assertThat(event.failureReason()).isEqualTo("INSUFFICIENT_FUNDS");
     }

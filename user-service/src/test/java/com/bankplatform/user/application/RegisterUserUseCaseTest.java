@@ -22,14 +22,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class RegisterUserUseCaseTest {
 
-    @Mock
-    private UserRepository userRepository;
+    @Mock private UserRepository userRepository;
 
-    @Mock
-    private PasswordHasher passwordHasher;
+    @Mock private PasswordHasher passwordHasher;
 
-    @Mock
-    private EventPublisher eventPublisher;
+    @Mock private EventPublisher eventPublisher;
 
     private RegisterUserUseCase useCase;
 
@@ -42,21 +39,27 @@ class RegisterUserUseCaseTest {
     void registersNewUser() {
         when(userRepository.existsByEmail(any(Email.class))).thenReturn(false);
         when(passwordHasher.hash(anyString())).thenReturn("hashed");
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(userRepository.save(any(User.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         User user = useCase.register("alice@example.com", "+911234567890", "Alice", "password123");
 
         assertThat(user.email().value()).isEqualTo("alice@example.com");
         assertThat(user.credential().passwordHash()).isEqualTo("hashed");
-        verify(eventPublisher).publish("user-created", "User", user.id().toString(),
-                UserCreatedPayload.from(user));
+        verify(eventPublisher)
+                .publish(
+                        "user-created",
+                        "User",
+                        user.id().toString(),
+                        UserCreatedPayload.from(user));
     }
 
     @Test
     void rejectsDuplicateEmail() {
         when(userRepository.existsByEmail(any(Email.class))).thenReturn(true);
 
-        assertThatThrownBy(() -> useCase.register("alice@example.com", null, "Alice", "password123"))
+        assertThatThrownBy(
+                        () -> useCase.register("alice@example.com", null, "Alice", "password123"))
                 .isInstanceOf(ConflictException.class);
     }
 }

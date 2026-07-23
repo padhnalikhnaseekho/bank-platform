@@ -9,7 +9,8 @@ import org.springframework.context.annotation.Bean;
 public class IdempotentEventProcessorAutoConfiguration {
 
     @Bean
-    public IdempotentEventProcessor idempotentEventProcessor(ProcessedEventStore processedEventStore) {
+    public IdempotentEventProcessor idempotentEventProcessor(
+            ProcessedEventStore processedEventStore) {
         return new IdempotentEventProcessor(processedEventStore);
     }
 }

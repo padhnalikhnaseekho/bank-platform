@@ -18,8 +18,17 @@ public class StatementJob {
     private final Instant createdAt;
     private Instant updatedAt;
 
-    public StatementJob(StatementId id, UUID customerId, UUID accountId, Instant periodStart, Instant periodEnd,
-            StatementStatus status, String csvFileUrl, String pdfFileUrl, Instant createdAt, Instant updatedAt) {
+    public StatementJob(
+            StatementId id,
+            UUID customerId,
+            UUID accountId,
+            Instant periodStart,
+            Instant periodEnd,
+            StatementStatus status,
+            String csvFileUrl,
+            String pdfFileUrl,
+            Instant createdAt,
+            Instant updatedAt) {
         this.id = id;
         this.customerId = customerId;
         this.accountId = accountId;
@@ -32,13 +41,23 @@ public class StatementJob {
         this.updatedAt = updatedAt;
     }
 
-    public static StatementJob request(UUID customerId, UUID accountId, Instant periodStart, Instant periodEnd) {
+    public static StatementJob request(
+            UUID customerId, UUID accountId, Instant periodStart, Instant periodEnd) {
         if (!periodStart.isBefore(periodEnd)) {
             throw new ValidationException("periodStart must be before periodEnd");
         }
         Instant now = Instant.now();
-        return new StatementJob(StatementId.newId(), customerId, accountId, periodStart, periodEnd,
-                StatementStatus.PENDING, null, null, now, now);
+        return new StatementJob(
+                StatementId.newId(),
+                customerId,
+                accountId,
+                periodStart,
+                periodEnd,
+                StatementStatus.PENDING,
+                null,
+                null,
+                now,
+                now);
     }
 
     public void complete(String csvFileUrl, String pdfFileUrl) {
@@ -57,7 +76,8 @@ public class StatementJob {
 
     private void requirePending() {
         if (status != StatementStatus.PENDING) {
-            throw new ConflictException("Statement job " + id + " must be PENDING but is " + status);
+            throw new ConflictException(
+                    "Statement job " + id + " must be PENDING but is " + status);
         }
     }
 

@@ -16,8 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class RecordAuditEventUseCaseTest {
 
-    @Mock
-    private AuditEventRepository auditEventRepository;
+    @Mock private AuditEventRepository auditEventRepository;
 
     private RecordAuditEventUseCase useCase;
 
@@ -30,8 +29,19 @@ class RecordAuditEventUseCaseTest {
     void capturesTheEnvelopeAsAnAuditEvent() {
         UUID eventId = UUID.randomUUID();
         Instant occurredAt = Instant.now();
-        EventEnvelope envelope = new EventEnvelope(eventId, "account-created", 1, occurredAt, "account-service",
-                "corr-1", null, "Account", "acc-1", "acc-1", null);
+        EventEnvelope envelope =
+                new EventEnvelope(
+                        eventId,
+                        "account-created",
+                        1,
+                        occurredAt,
+                        "account-service",
+                        "corr-1",
+                        null,
+                        "Account",
+                        "acc-1",
+                        "acc-1",
+                        null);
 
         useCase.record(envelope, "{\"a\":1}");
 
@@ -39,9 +49,14 @@ class RecordAuditEventUseCaseTest {
     }
 
     private AuditEvent argThatMatches(UUID eventId, Instant occurredAt) {
-        return org.mockito.ArgumentMatchers.argThat(event -> event.eventId().equals(eventId)
-                && event.eventType().equals("account-created") && event.aggregateType().equals("Account")
-                && event.aggregateId().equals("acc-1") && event.payload().equals("{\"a\":1}")
-                && event.correlationId().equals("corr-1") && event.occurredAt().equals(occurredAt));
+        return org.mockito.ArgumentMatchers.argThat(
+                event ->
+                        event.eventId().equals(eventId)
+                                && event.eventType().equals("account-created")
+                                && event.aggregateType().equals("Account")
+                                && event.aggregateId().equals("acc-1")
+                                && event.payload().equals("{\"a\":1}")
+                                && event.correlationId().equals("corr-1")
+                                && event.occurredAt().equals(occurredAt));
     }
 }

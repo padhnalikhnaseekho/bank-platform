@@ -42,7 +42,8 @@ public record Money(BigDecimal amount, Currency currency) {
 
     private void requireSameCurrency(Money other) {
         if (!currency.equals(other.currency)) {
-            throw new IllegalArgumentException("Currency mismatch: " + currency + " vs " + other.currency);
+            throw new IllegalArgumentException(
+                    "Currency mismatch: " + currency + " vs " + other.currency);
         }
     }
 }

@@ -28,13 +28,17 @@ public class AuthController {
     @PostMapping("/login")
     public AuthResponse login(@Valid @RequestBody LoginRequest request) {
         LoginUseCase.Result result = loginUseCase.login(request.email(), request.password());
-        return new AuthResponse(result.accessToken(), result.refreshToken(), result.refreshTokenExpiresAt(),
+        return new AuthResponse(
+                result.accessToken(),
+                result.refreshToken(),
+                result.refreshTokenExpiresAt(),
                 UserResponse.from(result.user()));
     }
 
     @PostMapping("/refresh")
     public TokenResponse refresh(@Valid @RequestBody RefreshRequest request) {
         RefreshTokenUseCase.Result result = refreshTokenUseCase.refresh(request.refreshToken());
-        return new TokenResponse(result.accessToken(), result.refreshToken(), result.refreshTokenExpiresAt());
+        return new TokenResponse(
+                result.accessToken(), result.refreshToken(), result.refreshTokenExpiresAt());
     }
 }

@@ -12,8 +12,7 @@ import java.util.UUID;
 @Table(name = "payment_instructions")
 public class PaymentInstructionEntity {
 
-    @Id
-    private UUID id;
+    @Id private UUID id;
 
     @Column(name = "customer_id", nullable = false)
     private UUID customerId;
@@ -50,9 +49,19 @@ public class PaymentInstructionEntity {
 
     protected PaymentInstructionEntity() {}
 
-    public PaymentInstructionEntity(UUID id, UUID customerId, UUID sourceAccountId, UUID payeeAccountId,
-            BigDecimal amount, String currency, String scheduleType, Integer intervalDays, Instant nextRunAt,
-            String status, Instant createdAt, Instant updatedAt) {
+    public PaymentInstructionEntity(
+            UUID id,
+            UUID customerId,
+            UUID sourceAccountId,
+            UUID payeeAccountId,
+            BigDecimal amount,
+            String currency,
+            String scheduleType,
+            Integer intervalDays,
+            Instant nextRunAt,
+            String status,
+            Instant createdAt,
+            Instant updatedAt) {
         this.id = id;
         this.customerId = customerId;
         this.sourceAccountId = sourceAccountId;

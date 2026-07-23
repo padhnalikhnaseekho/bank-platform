@@ -21,40 +21,70 @@ import tools.jackson.databind.ObjectMapper;
 @ExtendWith(MockitoExtension.class)
 class FraudAlertListenerTest {
 
-    @Mock
-    private FreezeAccountsForFraudAlertUseCase freezeAccountsForFraudAlertUseCase;
+    @Mock private FreezeAccountsForFraudAlertUseCase freezeAccountsForFraudAlertUseCase;
 
-    @Mock
-    private IdempotentEventProcessor idempotentEventProcessor;
+    @Mock private IdempotentEventProcessor idempotentEventProcessor;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private FraudAlertListener listener;
 
-    private record FraudAlertPayload(UUID id, String customerId, String type, long transferCount,
-            BigDecimal totalAmount, String currency, Instant windowStart, Instant windowEnd, Instant triggeredAt,
+    private record FraudAlertPayload(
+            UUID id,
+            String customerId,
+            String type,
+            long transferCount,
+            BigDecimal totalAmount,
+            String currency,
+            Instant windowStart,
+            Instant windowEnd,
+            Instant triggeredAt,
             String message) {}
 
     @BeforeEach
     void setUp() {
-        listener = new FraudAlertListener(freezeAccountsForFraudAlertUseCase, idempotentEventProcessor,
-                objectMapper);
+        listener =
+                new FraudAlertListener(
+                        freezeAccountsForFraudAlertUseCase, idempotentEventProcessor, objectMapper);
     }
 
     private void stubProcessorToRunHandler() {
-        doAnswer(invocation -> {
-            Runnable handler = invocation.getArgument(2);
-            handler.run();
-            return null;
-        }).when(idempotentEventProcessor).process(any(), any(), any());
+        doAnswer(
+                        invocation -> {
+                            Runnable handler = invocation.getArgument(2);
+                            handler.run();
+                            return null;
+                        })
+                .when(idempotentEventProcessor)
+                .process(any(), any(), any());
     }
 
     private String toMessage(UUID customerId) {
-        FraudAlertPayload payload = new FraudAlertPayload(UUID.randomUUID(), customerId.toString(),
-                "HIGH_TRANSFER_COUNT", 6, new BigDecimal("100.00"), "INR", Instant.now(), Instant.now(),
-                Instant.now(), "Customer made 6 transfers");
-        EventEnvelope envelope = new EventEnvelope(UUID.randomUUID(), "fraud-alert", 1, Instant.now(),
-                "fraud-service", "corr-1", null, "Customer", customerId.toString(), customerId.toString(), payload);
+        FraudAlertPayload payload =
+                new FraudAlertPayload(
+                        UUID.randomUUID(),
+                        customerId.toString(),
+                        "HIGH_TRANSFER_COUNT",
+                        6,
+                        new BigDecimal("100.00"),
+                        "INR",
+                        Instant.now(),
+                        Instant.now(),
+                        Instant.now(),
+                        "Customer made 6 transfers");
+        EventEnvelope envelope =
+                new EventEnvelope(
+                        UUID.randomUUID(),
+                        "fraud-alert",
+                        1,
+                        Instant.now(),
+                        "fraud-service",
+                        "corr-1",
+                        null,
+                        "Customer",
+                        customerId.toString(),
+                        customerId.toString(),
+                        payload);
         return objectMapper.writeValueAsString(envelope);
     }
 

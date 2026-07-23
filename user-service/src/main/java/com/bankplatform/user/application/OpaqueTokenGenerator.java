@@ -8,9 +8,9 @@ import java.util.Base64;
 import org.springframework.stereotype.Component;
 
 /**
- * Generates and hashes opaque refresh tokens. SHA-256 (not BCrypt) is deliberate here: the
- * token itself is high-entropy random data looked up by exact hash match, not a low-entropy
- * secret that needs a slow, salted KDF the way a login password does.
+ * Generates and hashes opaque refresh tokens. SHA-256 (not BCrypt) is deliberate here: the token
+ * itself is high-entropy random data looked up by exact hash match, not a low-entropy secret that
+ * needs a slow, salted KDF the way a login password does.
  */
 @Component
 class OpaqueTokenGenerator {

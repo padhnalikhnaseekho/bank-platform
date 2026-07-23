@@ -20,8 +20,10 @@ public class GetStatementJobUseCase {
 
     @Transactional(readOnly = true)
     public StatementJob getById(StatementId id, UUID requesterId, boolean isAdmin) {
-        StatementJob job = statementJobRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Statement not found"));
+        StatementJob job =
+                statementJobRepository
+                        .findById(id)
+                        .orElseThrow(() -> new NotFoundException("Statement not found"));
         if (!isAdmin && !job.customerId().equals(requesterId)) {
             throw new AccessDeniedException("Not authorized to view this statement");
         }

@@ -16,8 +16,16 @@ public class Transaction {
     private final Instant createdAt;
     private Instant updatedAt;
 
-    public Transaction(TransactionId id, UUID customerId, TransactionType type, TransactionStatus status,
-            Money amount, UUID sourceAccountId, UUID targetAccountId, Instant createdAt, Instant updatedAt) {
+    public Transaction(
+            TransactionId id,
+            UUID customerId,
+            TransactionType type,
+            TransactionStatus status,
+            Money amount,
+            UUID sourceAccountId,
+            UUID targetAccountId,
+            Instant createdAt,
+            Instant updatedAt) {
         this.id = id;
         this.customerId = customerId;
         this.type = type;
@@ -29,7 +37,11 @@ public class Transaction {
         this.updatedAt = updatedAt;
     }
 
-    public static Transaction receive(UUID customerId, TransactionType type, Money amount, UUID sourceAccountId,
+    public static Transaction receive(
+            UUID customerId,
+            TransactionType type,
+            Money amount,
+            UUID sourceAccountId,
             UUID targetAccountId) {
         if (type == TransactionType.DEPOSIT && targetAccountId == null) {
             throw new IllegalArgumentException("Deposit requires a target account");
@@ -37,12 +49,22 @@ public class Transaction {
         if (type == TransactionType.WITHDRAWAL && sourceAccountId == null) {
             throw new IllegalArgumentException("Withdrawal requires a source account");
         }
-        if (type == TransactionType.TRANSFER && (sourceAccountId == null || targetAccountId == null)) {
-            throw new IllegalArgumentException("Transfer requires both a source and target account");
+        if (type == TransactionType.TRANSFER
+                && (sourceAccountId == null || targetAccountId == null)) {
+            throw new IllegalArgumentException(
+                    "Transfer requires both a source and target account");
         }
         Instant now = Instant.now();
-        return new Transaction(TransactionId.newId(), customerId, type, TransactionStatus.RECEIVED, amount,
-                sourceAccountId, targetAccountId, now, now);
+        return new Transaction(
+                TransactionId.newId(),
+                customerId,
+                type,
+                TransactionStatus.RECEIVED,
+                amount,
+                sourceAccountId,
+                targetAccountId,
+                now,
+                now);
     }
 
     public void validate() {

@@ -15,9 +15,14 @@ public record PaymentCreatedPayload(
         Instant nextRunAt) {
 
     public static PaymentCreatedPayload from(PaymentInstruction instruction) {
-        return new PaymentCreatedPayload(instruction.id().toString(), instruction.customerId().toString(),
-                instruction.sourceAccountId().toString(), instruction.payeeAccountId().toString(),
-                instruction.amount().amount(), instruction.amount().currency().getCurrencyCode(),
-                instruction.schedule().type().name(), instruction.schedule().nextRunAt());
+        return new PaymentCreatedPayload(
+                instruction.id().toString(),
+                instruction.customerId().toString(),
+                instruction.sourceAccountId().toString(),
+                instruction.payeeAccountId().toString(),
+                instruction.amount().amount(),
+                instruction.amount().currency().getCurrencyCode(),
+                instruction.schedule().type().name(),
+                instruction.schedule().nextRunAt());
     }
 }

@@ -11,8 +11,7 @@ import java.util.UUID;
 @Table(name = "payment_attempts")
 public class PaymentAttemptEntity {
 
-    @Id
-    private UUID id;
+    @Id private UUID id;
 
     @Column(name = "payment_instruction_id", nullable = false)
     private UUID paymentInstructionId;
@@ -31,8 +30,13 @@ public class PaymentAttemptEntity {
 
     protected PaymentAttemptEntity() {}
 
-    public PaymentAttemptEntity(UUID id, UUID paymentInstructionId, UUID transactionId, String status,
-            String failureReason, Instant attemptedAt) {
+    public PaymentAttemptEntity(
+            UUID id,
+            UUID paymentInstructionId,
+            UUID transactionId,
+            String status,
+            String failureReason,
+            Instant attemptedAt) {
         this.id = id;
         this.paymentInstructionId = paymentInstructionId;
         this.transactionId = transactionId;
