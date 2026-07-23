@@ -5,7 +5,10 @@
 - [x] Create Gradle parent project (plan called for Maven; built as a multi-module Gradle project instead)
 - [x] Configure Java 21
 - [x] Configure Spring Boot dependency management (Spring Boot 4.1.0, ahead of the Spring Boot 3 originally planned)
-- [ ] Add Checkstyle or Spotless
+- [x] Add Checkstyle or Spotless (Spotless + google-java-format in AOSP mode, 4-space indent to
+      match the existing style; applied to all 11 modules via a `subprojects {}` block in the
+      root build.gradle.kts rather than repeating config per module; `spotlessCheck` runs as
+      part of `check`/`build`, so CI now fails on unformatted code)
 - [x] Add Docker Compose
 - [x] Add PostgreSQL container
 - [x] Add Kafka container
@@ -138,13 +141,18 @@ AWS API call (proving the whole ~1,850-line module graph resolves and is acyclic
       calls to wrap (only Spring Security's transparent JWKS fetch), so there's no natural
       application point for it today
 - [ ] Circuit breaker — same reasoning as retry
+- [x] Bulkhead (`docs/adr/0011-bulkhead-isolation.md` — not originally itemized in this
+      checklist but is one of `plan/ROADMAP.md`'s Phase 5 deliverables; explicit HikariCP pool
+      sizing, Kafka listener/streams thread counts, Tomcat thread caps, and a fix for a real bug
+      this surfaced: `OutboxPublisherJob`'s Kafka send had no timeout, so on a Kafka outage it
+      could hang the single scheduling thread payment-service shares between the outbox
+      publisher and its due-payment poller, forever)
 - [x] Rate limiter (api-gateway only, the one place it's clearly meaningful regardless of
-      internal call patterns) — in-memory Resilience4j `RateLimiter`, one bucket per client IP
-      per route, 100 req/60s default, 429 on exhaustion; not Bucket4j because Spring Cloud
-      Gateway's built-in Bucket4j filter needs a distributed `AsyncProxyManager` bean we don't
-      have (Redis/Hazelcast), so a plain in-memory limiter is the pragmatic fit here; verified
-      live via k6 (429s under load at the default limit, 0% failures after raising
-      RATE_LIMIT_CAPACITY)
+      internal call patterns) — Redis-backed sliding-window-log limiter (one bucket per client
+      IP, 100 req/60s default, 429 on exhaustion), see
+      `docs/adr/0012-redis-backed-rate-limiter.md`; started as an in-memory Resilience4j
+      limiter (`docs/adr/0009`, superseded) before Redis was wired into the platform for real;
+      verified live via k6 and by inspecting the Redis sorted set directly after triggering 429s
 - [x] Load tests (k6, `load-tests/money-movement.js` — register/login/open account/deposit/read
       status through the gateway); verified live end-to-end, see `load-tests/README.md` for the
       rate-limiter caveat when running at higher VU counts

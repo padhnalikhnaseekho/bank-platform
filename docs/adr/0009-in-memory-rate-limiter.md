@@ -2,7 +2,11 @@
 
 ## Status
 
-Accepted
+Superseded by [ADR-0012](0012-redis-backed-rate-limiter.md) — the "Consequences" section below
+called out the exact two limitations (fixed-window bursting, no cross-replica sharing) that
+ADR-0012 fixes by moving to a Redis-backed sliding-window-log limiter. Kept here for the
+historical record of why the in-memory approach was chosen first and what specifically was
+learned from it.
 
 ## Context
 

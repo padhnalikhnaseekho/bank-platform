@@ -17,6 +17,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.utility.DockerImageName;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -24,35 +26,56 @@ class GatewayRoutingTest {
 
     private static WireMockServer userServiceStub;
 
-    @Autowired
-    private MockMvc mockMvc;
+    // No dedicated official Testcontainers Redis module exists (unlike Postgres/Kafka), so a
+    // plain GenericContainer is the idiomatic choice here.
+    private static final GenericContainer<?> redis =
+            new GenericContainer<>(DockerImageName.parse("redis:7-alpine")).withExposedPorts(6379);
+
+    @Autowired private MockMvc mockMvc;
 
     @BeforeAll
     static void startStub() {
         // Disable h2c so the JVM's HTTP client (which prefers HTTP/2) doesn't attempt an
         // upgrade WireMock resets mid-stream.
-        userServiceStub = new WireMockServer(WireMockConfiguration.options().port(0).http2PlainDisabled(true));
+        userServiceStub =
+                new WireMockServer(
+                        WireMockConfiguration.options().port(0).http2PlainDisabled(true));
         userServiceStub.start();
+        redis.start();
     }
 
     @AfterAll
     static void stopStub() {
         userServiceStub.stop();
+        redis.stop();
     }
 
     @DynamicPropertySource
     static void routeProperties(DynamicPropertyRegistry registry) {
-        registry.add("bank-platform.routes.user-service", () -> "http://localhost:" + userServiceStub.port());
-        registry.add("bank-platform.routes.account-service", () -> "http://localhost:" + userServiceStub.port());
+        registry.add(
+                "bank-platform.routes.user-service",
+                () -> "http://localhost:" + userServiceStub.port());
+        registry.add(
+                "bank-platform.routes.account-service",
+                () -> "http://localhost:" + userServiceStub.port());
+        registry.add("spring.data.redis.host", redis::getHost);
+        registry.add("spring.data.redis.port", () -> redis.getMappedPort(6379));
     }
 
     @Test
     void forwardsPublicRegisterRequestToUserService() throws Exception {
-        userServiceStub.stubFor(WireMock.post(WireMock.urlEqualTo("/api/v1/users/register"))
-                .willReturn(WireMock.aResponse().withStatus(201).withHeader("Content-Type", "application/json")
-                        .withBody("{\"id\":\"stub-user-id\"}")));
+        userServiceStub.stubFor(
+                WireMock.post(WireMock.urlEqualTo("/api/v1/users/register"))
+                        .willReturn(
+                                WireMock.aResponse()
+                                        .withStatus(201)
+                                        .withHeader("Content-Type", "application/json")
+                                        .withBody("{\"id\":\"stub-user-id\"}")));
 
-        mockMvc.perform(post("/api/v1/users/register").contentType(MediaType.APPLICATION_JSON).content("{}"))
+        mockMvc.perform(
+                        post("/api/v1/users/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
                 .andExpect(status().isCreated());
     }
 
