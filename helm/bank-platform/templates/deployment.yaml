@@ -1,0 +1,77 @@
+{{- $root := . -}}
+{{- range .Values.services }}
+{{- $svc := . -}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $svc.name }}
+  namespace: {{ $root.Values.namespace }}
+  labels:
+    app: {{ $svc.name }}
+spec:
+  replicas: {{ $svc.replicas | default 1 }}
+  selector:
+    matchLabels:
+      app: {{ $svc.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $svc.name }}
+    spec:
+      containers:
+        - name: {{ $svc.name }}
+          image: {{ include "bank-platform.image" (dict "root" $root "svc" $svc) }}
+          imagePullPolicy: {{ $root.Values.global.imagePullPolicy }}
+          ports:
+            - containerPort: {{ $svc.port }}
+          env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ $root.Values.global.otlp.endpoint | quote }}
+{{- if $svc.needsDb }}
+            - name: DB_URL
+              value: "jdbc:postgresql://{{ $root.Values.global.postgres.host }}:{{ $root.Values.global.postgres.port }}/{{ $root.Values.global.postgres.database }}"
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: bank-platform-postgres
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bank-platform-postgres
+                  key: password
+{{- end }}
+{{- if $svc.needsKafka }}
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: {{ $root.Values.global.kafka.bootstrapServers | quote }}
+{{- end }}
+{{- if $svc.needsJwks }}
+            - name: USER_SERVICE_JWKS_URI
+              value: {{ $root.Values.global.jwksUri | quote }}
+{{- end }}
+{{- if eq $svc.name "api-gateway" }}
+            - name: RATE_LIMIT_CAPACITY
+              value: {{ $root.Values.global.rateLimit.capacity | quote }}
+            - name: RATE_LIMIT_PERIOD_SECONDS
+              value: {{ $root.Values.global.rateLimit.periodSeconds | quote }}
+{{- end }}
+{{- range $key, $value := $svc.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+{{- end }}
+          resources:
+{{ toYaml $root.Values.global.resources | indent 12 }}
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: {{ $svc.port }}
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: {{ $svc.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 20
+{{ end }}

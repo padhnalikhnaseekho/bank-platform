@@ -148,4 +148,23 @@ AWS API call (proving the whole ~1,850-line module graph resolves and is acyclic
 - [x] Load tests (k6, `load-tests/money-movement.js` — register/login/open account/deposit/read
       status through the gateway); verified live end-to-end, see `load-tests/README.md` for the
       rate-limiter caveat when running at higher VU counts
+- [x] Kubernetes manifests / Helm chart (`helm/bank-platform/` — not originally itemized in this
+      checklist but is one of the Phase 5 deliverables in `plan/ROADMAP.md`; a portable
+      alternative to the Terraform/ECS deployment, not a replacement for it — see
+      [ADR-0006](../docs/adr/0006-ecs-fargate-over-eks.md); `helm lint`/`helm template` verified
+      clean, not `helm install`'d against a live cluster)
+- [x] Contract tests (`*ContractTest.java` in account/transaction/fraud/notification/payment/
+      reporting-service, backed by shared JSON fixtures in
+      `common-library/src/testFixtures/resources/contracts/`) — this repo has each event's DTO
+      hand-copied into every consumer independently (discovered while building this: 6 separate
+      `TransferOutcomeEvent` definitions across 5 services), so these tests are a real gap-filler,
+      not a formality; producer-side tests assert the actual serialized payload matches the
+      fixture, consumer-side tests assert each service's own DTO can still read it
+- [x] Architecture Decision Records (`docs/adr/`, 10 ADRs covering hexagonal architecture, the
+      outbox pattern, schema-per-service, Kafka topic-per-event-type, the self-invocation
+      `@Transactional` bug, ECS vs EKS, MSK Serverless, the gateway's WebMVC vs WebFlux choice,
+      and the in-memory rate limiter)
+- [x] Interview guide mapped to code (`plan/INTERVIEW_QUESTIONS.md` — all 60 questions now carry
+      a pointer to the file/class that answers them, or an explicit note where no anchor exists
+      in this repo, e.g. `ConcurrentHashMap` and sealed classes are never used here)
 

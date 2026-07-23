@@ -1,0 +1,8 @@
+{
+  "transactionId": "8f14e45f-ceea-467e-adde-3fb5c8e75f92",
+  "type": "TRANSFER",
+  "sourceAccountId": "b3816b1d-8760-4f2e-9b6e-2b1f8f5d9a01",
+  "targetAccountId": "c6f3f6f0-5b2a-4b1a-9b8b-3f7f8f5d9a02",
+  "amount": 250.00,
+  "currency": "USD"
+}

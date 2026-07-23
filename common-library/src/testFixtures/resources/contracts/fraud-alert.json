@@ -1,0 +1,12 @@
+{
+  "id": "a1b2c3d4-e5f6-4708-8901-2a3b4c5d6e7f",
+  "customerId": "d1a2b3c4-d5e6-4f70-8a91-0b1c2d3e4f50",
+  "type": "HIGH_TRANSFER_COUNT",
+  "transferCount": 6,
+  "totalAmount": 62000.00,
+  "currency": "USD",
+  "windowStart": "2026-07-21T15:50:00Z",
+  "windowEnd": "2026-07-21T16:00:00Z",
+  "triggeredAt": "2026-07-21T16:00:00Z",
+  "message": "Customer exceeded 5 transfers within a 10 minute window"
+}

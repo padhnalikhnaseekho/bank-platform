@@ -28,6 +28,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     testFixturesImplementation(libs.spring.boot.starter.test)
+    testFixturesImplementation("tools.jackson.core:jackson-databind")
     testFixturesImplementation(libs.testcontainers.junit.jupiter)
     testFixturesImplementation(libs.testcontainers.postgresql)
     testFixturesImplementation(libs.testcontainers.kafka)

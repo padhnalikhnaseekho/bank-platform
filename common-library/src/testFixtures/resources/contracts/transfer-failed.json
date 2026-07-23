@@ -1,0 +1,10 @@
+{
+  "transactionId": "8f14e45f-ceea-467e-adde-3fb5c8e75f92",
+  "sourceAccountId": "b3816b1d-8760-4f2e-9b6e-2b1f8f5d9a01",
+  "targetAccountId": "c6f3f6f0-5b2a-4b1a-9b8b-3f7f8f5d9a02",
+  "sourceCustomerId": "d1a2b3c4-d5e6-4f70-8a91-0b1c2d3e4f50",
+  "targetCustomerId": "e2b3c4d5-e6f7-4081-9ba2-1c2d3e4f5061",
+  "amount": 250.00,
+  "currency": "USD",
+  "failureReason": "INSUFFICIENT_FUNDS"
+}

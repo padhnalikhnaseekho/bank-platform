@@ -29,6 +29,7 @@ dependencies {
 
     testImplementation(libs.spring.boot.starter.test)
     testImplementation(libs.kafka.streams.test.utils)
+    testImplementation(testFixtures(project(":common-library")))
 }
 
 tasks.withType<Test> {
